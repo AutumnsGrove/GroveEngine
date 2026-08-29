@@ -32,6 +32,9 @@ export const RATE_LIMIT_ADMIN_PER_IP = 30; // per minute
 // User profile rate limiting (avatar, preferences)
 export const RATE_LIMIT_USER_PROFILE = 20; // per minute
 
+// Logout rate limiting (per user — logout fans out to 4 revocation calls)
+export const RATE_LIMIT_LOGOUT = 10; // per minute
+
 // Subscription rate limiting
 export const RATE_LIMIT_SUBSCRIPTION_READ = 30; // per minute (GET endpoints)
 export const RATE_LIMIT_SUBSCRIPTION_WRITE = 10; // per minute (POST/PUT endpoints, internal-service only)

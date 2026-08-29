@@ -208,11 +208,13 @@ export interface DeviceCodeResponse {
 	interval: number;
 }
 
+// email/name are deliberately absent — GET /verify never sends them (clients
+// should use /userinfo). The type used to declare them anyway, which gave a
+// future edit type-system permission to leak PII from an endpoint that
+// requires no caller authentication.
 export interface TokenInfo {
 	active: boolean;
 	sub?: string;
-	email?: string;
-	name?: string;
 	exp?: number;
 	iat?: number;
 	client_id?: string;

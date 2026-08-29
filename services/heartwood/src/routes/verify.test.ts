@@ -12,6 +12,7 @@ import { createMockEnv, TEST_USER } from "../test-helpers.js";
 vi.mock("../db/queries.js", () => ({
 	getUserById: vi.fn(),
 	revokeAllUserTokens: vi.fn(),
+	revokeAllUserSessions: vi.fn(),
 }));
 
 // Mock db session
@@ -35,10 +36,29 @@ vi.mock("../middleware/security.js", () => ({
 	getUserAgent: vi.fn().mockReturnValue("test-agent"),
 }));
 
+// Mock the Better Auth session invalidation used by /logout's revocation fan-out
+vi.mock("../lib/server/session.js", () => ({
+	invalidateAllUserSessions: vi.fn().mockResolvedValue(true),
+}));
+
+// Keep the real verifyRateLimiter (skips under ENVIRONMENT === "test", which
+// mockEnv sets) but mock checkRouteRateLimit, which /logout calls directly
+// against createDbSession's mock (an empty object — the real implementation
+// would throw calling .prepare() on it).
+vi.mock("../middleware/rateLimit.js", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("../middleware/rateLimit.js")>();
+	return {
+		...actual,
+		checkRouteRateLimit: vi.fn().mockResolvedValue({ allowed: true, remaining: 10 }),
+	};
+});
+
 import verifyRoutes from "./verify.js";
-import { getUserById, revokeAllUserTokens } from "../db/queries.js";
+import { getUserById, revokeAllUserTokens, revokeAllUserSessions } from "../db/queries.js";
 import { verifyAccessToken } from "../services/jwt.js";
 import { logLogout } from "../services/user.js";
+import { invalidateAllUserSessions } from "../lib/server/session.js";
+import { checkRouteRateLimit } from "../middleware/rateLimit.js";
 
 // Type-safe response interfaces for tests
 interface TokenInfo {
@@ -74,7 +94,13 @@ function createApp() {
 	return app;
 }
 
-const mockEnv = createMockEnv();
+const revokeAllSessions = vi.fn().mockResolvedValue(0);
+const mockEnv = createMockEnv({
+	SESSIONS: {
+		idFromName: vi.fn().mockReturnValue("do-id"),
+		get: vi.fn().mockReturnValue({ revokeAllSessions }),
+	} as unknown as Env["SESSIONS"],
+});
 
 // =============================================================================
 // GET /verify - Token Introspection
@@ -139,6 +165,7 @@ describe("GET /verify", () => {
 
 		beforeEach(() => {
 			(verifyAccessToken as ReturnType<typeof vi.fn>).mockResolvedValue(mockPayload);
+			(getUserById as ReturnType<typeof vi.fn>).mockResolvedValue(TEST_USER);
 		});
 
 		it("returns active=true with token info", async () => {
@@ -174,6 +201,23 @@ describe("GET /verify", () => {
 			(verifyAccessToken as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
 			const res = await makeVerifyRequest("expired-token");
+			expect(res.status).toBe(200);
+			const json = (await res.json()) as TokenInfo;
+			expect(json.active).toBe(false);
+		});
+	});
+
+	describe("deleted user (MEDIUM-3 regression)", () => {
+		it("returns active=false for a signature-valid token whose user no longer exists, agreeing with /userinfo", async () => {
+			(verifyAccessToken as ReturnType<typeof vi.fn>).mockResolvedValue({
+				sub: "deleted-user",
+				exp: Math.floor(Date.now() / 1000) + 3600,
+				iat: Math.floor(Date.now() / 1000),
+				client_id: "test-app",
+			});
+			(getUserById as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+
+			const res = await makeVerifyRequest("token-for-deleted-user");
 			expect(res.status).toBe(200);
 			const json = (await res.json()) as TokenInfo;
 			expect(json.active).toBe(false);
@@ -346,6 +390,45 @@ describe("POST /logout", () => {
 			const json = (await res.json()) as LogoutResponse;
 			expect(json.success).toBe(true);
 			expect(json.redirect_uri).toBe("https://app.example.com/logged-out");
+		});
+
+		it("drops a non-string redirect_uri instead of echoing it untyped", async () => {
+			const res = await makeLogoutRequest("valid-token", { redirect_uri: { evil: true } });
+			expect(res.status).toBe(200);
+			const json = (await res.json()) as LogoutResponse;
+			expect(json.redirect_uri).toBeUndefined();
+		});
+
+		it("revokes SessionDO, Better Auth, and legacy D1 sessions in addition to refresh tokens (HIGH-1 regression)", async () => {
+			const res = await makeLogoutRequest("valid-token");
+			expect(res.status).toBe(200);
+
+			expect(revokeAllSessions).toHaveBeenCalled();
+			expect(invalidateAllUserSessions).toHaveBeenCalledWith(TEST_USER.id, mockEnv);
+			expect(revokeAllUserSessions).toHaveBeenCalledWith(expect.anything(), TEST_USER.id);
+		});
+
+		it("clears every auth cookie in the response (HIGH-1 regression)", async () => {
+			const res = await makeLogoutRequest("valid-token");
+			expect(res.status).toBe(200);
+
+			const setCookies = (res.headers as unknown as { getSetCookie(): string[] }).getSetCookie();
+			expect(setCookies.some((c) => c.startsWith("grove_session=;"))).toBe(true);
+			expect(setCookies.some((c) => c.startsWith("access_token=;"))).toBe(true);
+			expect(setCookies.some((c) => c.startsWith("refresh_token=;"))).toBe(true);
+			expect(setCookies.some((c) => c.startsWith("better-auth.session_token=;"))).toBe(true);
+		});
+
+		it("is rate limited per user (MEDIUM-1/2 regression)", async () => {
+			vi.mocked(checkRouteRateLimit).mockResolvedValueOnce({
+				allowed: false,
+				remaining: 0,
+				retryAfter: 30,
+			});
+
+			const res = await makeLogoutRequest("valid-token");
+			expect(res.status).toBe(429);
+			expect(revokeAllUserTokens).not.toHaveBeenCalled();
 		});
 	});
 });

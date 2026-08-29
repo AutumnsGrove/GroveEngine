@@ -97,8 +97,21 @@ export async function getRefreshTokenByHashAnyStatus(
 		.first<RefreshToken>();
 }
 
-export async function revokeAllUserTokens(db: D1DatabaseOrSession, userId: string): Promise<void> {
-	await db.prepare("UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ?").bind(userId).run();
+/**
+ * Revoke every active refresh token for a user. Returns the number of rows
+ * actually changed — the `AND revoked = 0` predicate means a repeat call
+ * (e.g. a caller hitting /logout multiple times with the same still-valid
+ * access token) doesn't rewrite already-revoked rows.
+ */
+export async function revokeAllUserTokens(
+	db: D1DatabaseOrSession,
+	userId: string,
+): Promise<number> {
+	const result = await db
+		.prepare("UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ? AND revoked = 0")
+		.bind(userId)
+		.run();
+	return result.meta?.changes ?? 0;
 }
 
 export async function cleanupExpiredRefreshTokens(db: D1DatabaseOrSession): Promise<void> {

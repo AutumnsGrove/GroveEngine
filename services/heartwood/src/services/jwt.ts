@@ -6,7 +6,12 @@ import * as jose from "jose";
 import type { Env, JWTPayload, User } from "../types.js";
 import { ACCESS_TOKEN_EXPIRY, JWT_ISSUER, JWT_ALGORITHM } from "../utils/constants.js";
 
-// Cache for imported keys (per-request, not persisted)
+// Cache for imported keys. NOTE: despite the name, this is per-*isolate*,
+// not per-request — Workers reuse an isolate across many requests, so a
+// warm isolate keeps verifying against whichever key was imported first
+// until it's recycled. Rotating JWT_PRIVATE_KEY/JWT_PUBLIC_KEY does not
+// invalidate this cache; deploying a new key can produce a window where
+// some in-flight isolates still validate against the old key.
 let cachedPrivateKey: CryptoKey | null = null;
 let cachedPublicKey: CryptoKey | null = null;
 
@@ -63,15 +68,27 @@ export async function createAccessToken(env: Env, user: User, clientId: string):
 }
 
 /**
- * Verify and decode a JWT access token
+ * Verify and decode a JWT access token.
+ *
+ * `expectedAudience` is optional and unchecked by default — /verify and
+ * /userinfo are generic resource-server endpoints serving every registered
+ * client equally, so they have no single expected audience to check
+ * against. A resource server that only ever expects tokens for its own
+ * client_id should pass its own client_id here so a token issued for a
+ * different client is rejected rather than merely decoded and trusted.
  */
-export async function verifyAccessToken(env: Env, token: string): Promise<JWTPayload | null> {
+export async function verifyAccessToken(
+	env: Env,
+	token: string,
+	expectedAudience?: string,
+): Promise<JWTPayload | null> {
 	try {
 		const publicKey = await getPublicKey(env);
 
 		const { payload } = await jose.jwtVerify(token, publicKey, {
 			issuer: JWT_ISSUER,
 			algorithms: [JWT_ALGORITHM],
+			...(expectedAudience ? { audience: expectedAudience } : {}),
 		});
 
 		return {
