@@ -12,19 +12,20 @@ import { getClientByClientId } from "../db/queries.js";
  */
 export const corsMiddleware: MiddlewareHandler<{ Bindings: Env }> = async (c, next) => {
 	const origin = c.req.header("Origin");
+	const isLocalDev = c.env?.AUTH_BASE_URL?.startsWith("http://localhost") ?? false;
 
 	// Handle preflight requests
 	if (c.req.method === "OPTIONS") {
 		return new Response(null, {
 			status: 204,
-			headers: getCorsHeaders(origin),
+			headers: getCorsHeaders(origin, isLocalDev),
 		});
 	}
 
 	await next();
 
 	// Add CORS headers to response
-	const corsHeaders = getCorsHeaders(origin);
+	const corsHeaders = getCorsHeaders(origin, isLocalDev);
 	for (const [key, value] of Object.entries(corsHeaders)) {
 		c.res.headers.set(key, value);
 	}
@@ -43,19 +44,6 @@ const ALLOWED_ORIGINS = [
 	"https://autumn.grove.place", // Property site
 ] as const;
 
-/**
- * Check if origin matches *.grove.place wildcard pattern
- * Allows any HTTPS subdomain of grove.place for future properties
- */
-function isGroveSubdomain(origin: string): boolean {
-	try {
-		const url = new URL(origin);
-		return url.hostname.endsWith(".grove.place") && url.protocol === "https:";
-	} catch {
-		return false;
-	}
-}
-
 function isLocalhost(origin: string): boolean {
 	try {
 		const url = new URL(origin);
@@ -67,9 +55,16 @@ function isLocalhost(origin: string): boolean {
 
 /**
  * Get CORS headers for a given origin
- * Validates against an explicit list of allowed origins
+ *
+ * Validates against an explicit list of allowed origins only — no
+ * *.grove.place wildcard. Tenant blog subdomains (<tenant>.grove.place) are
+ * user-controlled and share the grove_session cookie's Domain=.grove.place
+ * scope, so granting them credentialed CORS would let any tenant site read
+ * session-authenticated Heartwood responses (including /admin/*) for a
+ * visiting admin. localhost is only trusted when AUTH_BASE_URL itself
+ * points at localhost (local dev), never in a deployed environment.
  */
-function getCorsHeaders(origin: string | undefined): Record<string, string> {
+function getCorsHeaders(origin: string | undefined, isLocalDev: boolean): Record<string, string> {
 	const headers: Record<string, string> = {
 		"Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
 		"Access-Control-Allow-Headers": "Content-Type, Authorization",
@@ -79,8 +74,7 @@ function getCorsHeaders(origin: string | undefined): Record<string, string> {
 	if (
 		origin &&
 		(ALLOWED_ORIGINS.includes(origin as (typeof ALLOWED_ORIGINS)[number]) ||
-			isGroveSubdomain(origin) ||
-			isLocalhost(origin))
+			(isLocalDev && isLocalhost(origin)))
 	) {
 		headers["Access-Control-Allow-Origin"] = origin;
 		headers["Access-Control-Allow-Credentials"] = "true";

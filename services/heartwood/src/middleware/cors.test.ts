@@ -66,12 +66,35 @@ describe("corsMiddleware", () => {
 			}
 		});
 
-		it("allows requests from any *.grove.place HTTPS subdomain", async () => {
+		it("allows localhost only when AUTH_BASE_URL points at localhost (local dev)", async () => {
+			const app = new Hono<{ Bindings: Env }>();
+			app.use("*", corsMiddleware);
+			app.get("/test", (c) => c.json({ ok: true }));
+
+			const localDevEnv = { ...mockEnv, AUTH_BASE_URL: "http://localhost:8787" };
+			const res = await app.request(
+				"/test",
+				{ headers: { Origin: "http://localhost:5173" } },
+				localDevEnv,
+			);
+
+			expect(res.headers.get("Access-Control-Allow-Origin")).toBe("http://localhost:5173");
+			expect(res.headers.get("Access-Control-Allow-Credentials")).toBe("true");
+		});
+	});
+
+	describe("regression: no wildcard trust for *.grove.place tenant subdomains", () => {
+		// grove_session is Domain=.grove.place, and every Robin's tenant blog
+		// lives at <tenant>.grove.place — a wildcard credentialed-CORS grant
+		// here would let any tenant site read session-authenticated Heartwood
+		// responses (including /admin/*) for a visiting admin. Only the
+		// explicit ALLOWED_ORIGINS allowlist may receive credentialed CORS.
+		it("does not allow credentialed CORS for unregistered *.grove.place subdomains", async () => {
 			const testOrigins = [
 				"https://new-property.grove.place",
 				"https://staging.grove.place",
 				"https://dev.grove.place",
-				"https://foo.grove.place",
+				"https://some-robin.grove.place",
 			];
 
 			for (const origin of testOrigins) {
@@ -80,9 +103,21 @@ describe("corsMiddleware", () => {
 					headers: { Origin: origin },
 				});
 
-				expect(res.headers.get("Access-Control-Allow-Origin")).toBe(origin);
-				expect(res.headers.get("Access-Control-Allow-Credentials")).toBe("true");
+				expect(res.headers.get("Access-Control-Allow-Origin")).toBeNull();
+				expect(res.headers.get("Access-Control-Allow-Credentials")).toBeNull();
 			}
+		});
+
+		it("does not allow localhost origins outside of local dev (AUTH_BASE_URL not localhost)", async () => {
+			const app = createTestApp();
+			const res = await app.request(
+				"/test",
+				{ headers: { Origin: "http://localhost:5173" } },
+				mockEnv,
+			);
+
+			expect(res.headers.get("Access-Control-Allow-Origin")).toBeNull();
+			expect(res.headers.get("Access-Control-Allow-Credentials")).toBeNull();
 		});
 	});
 
