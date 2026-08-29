@@ -170,7 +170,10 @@ export type AuditEventType =
 	| "refresh_token_reuse_detected"
 	| "cdn_file_uploaded"
 	| "cdn_file_deleted"
-	| "cdn_files_migrated";
+	| "cdn_files_migrated"
+	| "user_avatar_updated"
+	| "user_avatar_removed"
+	| "user_preferences_updated";
 
 // API Request/Response Types
 export interface TokenRequest {

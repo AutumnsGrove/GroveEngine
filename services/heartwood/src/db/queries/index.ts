@@ -18,6 +18,7 @@ export {
 	createUser,
 	updateUserLogin,
 	updateUserAvatar,
+	updateBetterAuthUserAvatar,
 	updateUserPreferences,
 	getOrCreateUser,
 } from "./users.js";

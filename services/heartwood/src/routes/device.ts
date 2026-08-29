@@ -34,6 +34,7 @@ import {
 import { deviceCodeInitSchema, deviceAuthorizeSchema } from "../utils/validation.js";
 import { getClientIP, getUserAgent } from "../middleware/security.js";
 import { checkRouteRateLimit } from "../middleware/rateLimit.js";
+import { isRequestFromTrustedOrigin } from "../middleware/csrf.js";
 import { parseCookieHeader } from "../lib/session.js";
 import {
 	DEVICE_CODE_EXPIRY,
@@ -390,45 +391,11 @@ device.get("/device", async (c) => {
 device.post("/device/authorize", async (c) => {
 	const db = createDbSession(c.env);
 
-	// CSRF protection: Validate Origin header on state-changing request
-	// SameSite=Lax cookies block cross-origin POST in modern browsers,
-	// but Origin validation provides defense-in-depth
-	const origin = c.req.header("Origin");
-	if (origin) {
-		const authOrigin = new URL(c.env.AUTH_BASE_URL).origin;
-		if (origin !== authOrigin) {
-			return c.json({ error: "invalid_request", error_description: "Invalid origin" }, 403);
-		}
-	} else {
-		// Origin header missing — check Referer as fallback
-		const referer = c.req.header("Referer");
-		if (referer) {
-			const authOrigin = new URL(c.env.AUTH_BASE_URL).origin;
-			// Extract origin from Referer URL for exact comparison.
-			// startsWith would allow "https://auth.grove.place.evil.com" to
-			// bypass. A malformed Referer must fail closed, not throw a raw
-			// 500 that skips the CSRF check entirely.
-			let refererOrigin: string | null = null;
-			try {
-				refererOrigin = new URL(referer).origin;
-			} catch {
-				refererOrigin = null;
-			}
-			if (refererOrigin !== authOrigin) {
-				return c.json({ error: "invalid_request", error_description: "Invalid origin" }, 403);
-			}
-		} else {
-			// SECURITY: Both Origin and Referer missing — deny by default.
-			// Modern browsers always send Origin on POST requests (same-origin and cross-origin).
-			// Missing both headers suggests header stripping (privacy extensions, proxies, or attack).
-			return c.json(
-				{
-					error: "invalid_request",
-					error_description: "Origin validation required",
-				},
-				403,
-			);
-		}
+	// CSRF protection: Validate Origin (falling back to Referer) on this
+	// state-changing request. See middleware/csrf.ts for why SameSite=Lax
+	// alone isn't sufficient here.
+	if (!isRequestFromTrustedOrigin(c.req.raw, new URL(c.env.AUTH_BASE_URL).origin)) {
+		return c.json({ error: "invalid_request", error_description: "Invalid origin" }, 403);
 	}
 
 	// Rate limit by IP, before the Better Auth session fetch or any DB

@@ -62,19 +62,52 @@ export async function updateUserLogin(
 		.run();
 }
 
+/**
+ * Update avatar_url on the legacy `users` table. Returns the number of rows
+ * changed — `users` only has a row for accounts that existed before the
+ * Better Auth migration (0002_migrate_users.sql migrated IDs 1:1); accounts
+ * created after that only exist in `ba_user`, so this affects 0 rows for
+ * them. Callers must check the count rather than assume success — see
+ * updateBetterAuthUserAvatar for the ba_user-backed equivalent.
+ */
 export async function updateUserAvatar(
 	db: D1DatabaseOrSession,
 	id: string,
 	avatarUrl: string | null,
-): Promise<void> {
-	await db.prepare(`UPDATE users SET avatar_url = ? WHERE id = ?`).bind(avatarUrl, id).run();
+): Promise<number> {
+	const result = await db
+		.prepare(`UPDATE users SET avatar_url = ? WHERE id = ?`)
+		.bind(avatarUrl, id)
+		.run();
+	return result.meta?.changes ?? 0;
 }
 
+/**
+ * Update avatar (the `image` column) on `ba_user`, for accounts that only
+ * exist in the Better Auth table. `ba_user` has no theme/grove_mode/season
+ * columns — updateUserPreferences has no equivalent for this table today.
+ */
+export async function updateBetterAuthUserAvatar(
+	db: D1DatabaseOrSession,
+	id: string,
+	avatarUrl: string | null,
+): Promise<number> {
+	const result = await db
+		.prepare(`UPDATE ba_user SET image = ? WHERE id = ?`)
+		.bind(avatarUrl, id)
+		.run();
+	return result.meta?.changes ?? 0;
+}
+
+/**
+ * Update display preferences on the legacy `users` table. Returns the
+ * number of rows changed — see updateUserAvatar for why this can be 0.
+ */
 export async function updateUserPreferences(
 	db: D1DatabaseOrSession,
 	id: string,
 	preferences: { theme?: string | null; grove_mode?: boolean | null; season?: string | null },
-): Promise<void> {
+): Promise<number> {
 	const sets: string[] = [];
 	const values: unknown[] = [];
 
@@ -91,13 +124,14 @@ export async function updateUserPreferences(
 		values.push(preferences.season);
 	}
 
-	if (sets.length === 0) return;
+	if (sets.length === 0) return 0;
 
 	values.push(id);
-	await db
+	const result = await db
 		.prepare(`UPDATE users SET ${sets.join(", ")} WHERE id = ?`)
 		.bind(...values)
 		.run();
+	return result.meta?.changes ?? 0;
 }
 
 export async function getOrCreateUser(

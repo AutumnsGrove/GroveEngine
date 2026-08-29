@@ -175,7 +175,9 @@ describe("corsMiddleware", () => {
 			});
 
 			// Should still have standard CORS headers, just not Allow-Origin
-			expect(res.headers.get("Access-Control-Allow-Methods")).toBe("GET, POST, DELETE, OPTIONS");
+			expect(res.headers.get("Access-Control-Allow-Methods")).toBe(
+				"GET, POST, PUT, DELETE, OPTIONS",
+			);
 			expect(res.headers.get("Access-Control-Allow-Headers")).toBe("Content-Type, Authorization");
 			expect(res.headers.get("Access-Control-Max-Age")).toBe("86400");
 			expect(res.headers.get("Access-Control-Allow-Origin")).toBeNull();
@@ -241,7 +243,9 @@ describe("corsMiddleware", () => {
 				headers: { Origin: "https://heartwood.grove.place" },
 			});
 
-			expect(res.headers.get("Access-Control-Allow-Methods")).toBe("GET, POST, DELETE, OPTIONS");
+			expect(res.headers.get("Access-Control-Allow-Methods")).toBe(
+				"GET, POST, PUT, DELETE, OPTIONS",
+			);
 		});
 
 		it("returns correct CORS headers in preflight", async () => {
