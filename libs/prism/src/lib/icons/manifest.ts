@@ -573,8 +573,11 @@ export const ICON_MANIFEST: IconManifest = {
 		toolbox: "Wrench",
 		origami: "Origami",
 		toolCase: "ToolCase",
-		codepen: "Codepen",
-		codesandbox: "Codesandbox",
+		// codepen/codesandbox: Lucide dropped these brand logos entirely (no
+		// file, no export, no alias anywhere in the package) — repointed to
+		// generic equivalents rather than a new icon-pack dependency.
+		codepen: "CodeXml",
+		codesandbox: "PackageOpen",
 		grape: "Grape",
 		pickaxe: "Pickaxe",
 		pencilRuler: "PencilRuler",
@@ -590,16 +593,23 @@ export const ICON_MANIFEST: IconManifest = {
 		goal: "Goal",
 		regex: "Regex",
 		sendToBack: "SendToBack",
-		waves: "Waves",
+		// waves: Lucide renamed this to WavesHorizontal; the old name is
+		// unreachable via the namespace import this adapter uses.
+		waves: "WavesHorizontal",
 		lineSquiggle: "LineSquiggle",
 		draftingCompass: "DraftingCompass",
 		squareAsterisk: "SquareAsterisk",
-		github: "Github",
-		chrome: "Chrome",
+		// github/chrome: Lucide dropped these brand logos entirely (no file,
+		// no export, no alias anywhere in the package) — repointed to
+		// generic equivalents rather than a new icon-pack dependency.
+		github: "GitBranch",
+		chrome: "AppWindow",
 		volume: "Volume2",
 		micOff: "MicOff",
 		mic: "Mic",
-		wand: "Wand2",
+		// wand: Lucide renamed this to WandSparkles; the old name is
+		// unreachable via the namespace import this adapter uses.
+		wand: "WandSparkles",
 		qrCode: "QrCode",
 		lifebuoy: "LifeBuoy",
 		telescope: "Telescope",
