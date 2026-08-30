@@ -15,9 +15,15 @@
 		navIcons,
 		stateIcons,
 		phaseIcons,
+		featureIcons,
 	} from "@autumnsgrove/prism/icons";
 	const Calendar = metricIcons.calendar;
-	const Github = chromeIcons.github;
+	// chromeIcons.github resolves to undefined: @lucide/svelte dropped brand/
+	// logo icons (Github, Chrome, Codepen, ...) and Prism's manifest still
+	// maps them, so the lookup silently returns nothing instead of a
+	// component. GitBranch is the closest source-control icon that still
+	// exists in the installed lucide package.
+	const Github = featureIcons.gitBranch;
 	const Key = authIcons.keyLegacy;
 	const Bot = toolIcons.shade;
 	const Mic2 = chromeIcons.mic;
