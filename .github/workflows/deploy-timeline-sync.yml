@@ -6,6 +6,13 @@ on:
     branches: [main]
     paths:
       - "workers/timeline-sync/**"
+      # timeline-sync imports @autumnsgrove/infra and @autumnsgrove/lattice
+      # (libs/engine). Without these path triggers a fix to either quietly
+      # never reaches this worker — see deploy-aspen.yml for the same gap
+      # found there. (This is how the Lumen service-binding fix almost
+      # shipped without ever redeploying the worker that needed it.)
+      - "libs/engine/**"
+      - "libs/infra/**"
   workflow_dispatch:
 
 permissions:

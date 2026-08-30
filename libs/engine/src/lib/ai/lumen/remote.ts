@@ -127,12 +127,21 @@ export class RemoteLumenClient {
 	/** Health check */
 	async healthCheck(): Promise<boolean> {
 		try {
-			const doFetch = this.fetcher?.fetch ?? fetch;
-			const response = await doFetch(`${this.baseUrl}/health`);
+			const response = await this.doFetch(`${this.baseUrl}/health`);
 			return response.ok;
 		} catch {
 			return false;
 		}
+	}
+
+	/**
+	 * Fetch via the service binding when present, calling `.fetch()` directly
+	 * on the binding to preserve `this` — detaching it into a bare function
+	 * reference throws "Illegal invocation" on Cloudflare service bindings.
+	 */
+	private doFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+		if (this.fetcher) return this.fetcher.fetch(input, init);
+		return fetch(input, init);
 	}
 
 	/** Run an inference request through the remote Lumen worker */
@@ -315,13 +324,12 @@ export class RemoteLumenClient {
 	// ─── Private ──────────────────────────────────────────────────
 
 	private async post(path: string, body: unknown): Promise<unknown> {
-		const doFetch = this.fetcher?.fetch ?? fetch;
 		const headers: Record<string, string> = { "Content-Type": "application/json" };
 		if (this.apiKey) {
 			headers["X-API-Key"] = this.apiKey;
 		}
 
-		const response = await doFetch(`${this.baseUrl}${path}`, {
+		const response = await this.doFetch(`${this.baseUrl}${path}`, {
 			method: "POST",
 			headers,
 			body: JSON.stringify(body),
