@@ -56,3 +56,7 @@ service = "grove-lumen"
 #                        tenant_secrets (auto-migrates it back into tenant_secrets on
 #                        read). Same value as used elsewhere for legacy token columns.
 #                        Set via: gw secret apply TOKEN_ENCRYPTION_KEY --worker grove-timeline-sync
+# TIMELINE_ADMIN_KEY   - REQUIRED to use the manual-trigger/debug HTTP routes
+#                        (GET /, /tenants, /debug). Without it those routes are
+#                        blocked entirely — this worker is cron-only otherwise.
+#                        Set via: gw secret apply TIMELINE_ADMIN_KEY --worker grove-timeline-sync

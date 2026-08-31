@@ -23,6 +23,8 @@ export interface Env {
 	LUMEN_API_KEY: string;
 	/** Optional fallback OpenRouter key if tenant key fails */
 	OPENROUTER_API_KEY?: string;
+	/** Bearer token gating the manual-trigger/debug HTTP routes (fetch handler) */
+	TIMELINE_ADMIN_KEY?: string;
 }
 
 // =============================================================================

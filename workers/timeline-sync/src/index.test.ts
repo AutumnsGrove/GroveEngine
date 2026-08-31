@@ -45,7 +45,10 @@ import type { Env } from "./config";
 // Mock Helpers
 // =============================================================================
 
-function createMockEnv(): Env {
+const TEST_API_KEY = "test-admin-key";
+const AUTH_HEADERS = { Authorization: `Bearer ${TEST_API_KEY}` };
+
+function createMockEnv(overrides: Partial<Env> = {}): Env {
 	return {
 		DB: {} as D1Database,
 		CURIO_DB: {} as D1Database,
@@ -54,6 +57,8 @@ function createMockEnv(): Env {
 		LUMEN: {
 			fetch: vi.fn().mockResolvedValue(new Response("ok")),
 		},
+		TIMELINE_ADMIN_KEY: TEST_API_KEY,
+		...overrides,
 	};
 }
 
@@ -101,7 +106,7 @@ describe("Worker HTTP Handler", () => {
 				commitCount: 5,
 			});
 
-			const request = new Request("http://localhost/", { method: "GET" });
+			const request = new Request("http://localhost/", { method: "GET", headers: AUTH_HEADERS });
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
@@ -118,7 +123,7 @@ describe("Worker HTTP Handler", () => {
 		it("with no tenants returns empty results", async () => {
 			(getEnabledTenants as any).mockResolvedValue([]);
 
-			const request = new Request("http://localhost/", { method: "GET" });
+			const request = new Request("http://localhost/", { method: "GET", headers: AUTH_HEADERS });
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
@@ -132,7 +137,10 @@ describe("Worker HTTP Handler", () => {
 		it("accepts optional ?date= parameter", async () => {
 			(getEnabledTenants as any).mockResolvedValue([createMockTenant()]);
 
-			const request = new Request("http://localhost/?date=2026-03-10", { method: "GET" });
+			const request = new Request("http://localhost/?date=2026-03-10", {
+				method: "GET",
+				headers: AUTH_HEADERS,
+			});
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
@@ -144,7 +152,7 @@ describe("Worker HTTP Handler", () => {
 		it("uses yesterday UTC when no ?date= parameter", async () => {
 			(getEnabledTenants as any).mockResolvedValue([]);
 
-			const request = new Request("http://localhost/", { method: "GET" });
+			const request = new Request("http://localhost/", { method: "GET", headers: AUTH_HEADERS });
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
@@ -180,7 +188,7 @@ describe("Worker HTTP Handler", () => {
 					error: "Token not found",
 				});
 
-			const request = new Request("http://localhost/", { method: "GET" });
+			const request = new Request("http://localhost/", { method: "GET", headers: AUTH_HEADERS });
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
@@ -212,7 +220,7 @@ describe("Worker HTTP Handler", () => {
 					error: "API error",
 				});
 
-			const request = new Request("http://localhost/", { method: "GET" });
+			const request = new Request("http://localhost/", { method: "GET", headers: AUTH_HEADERS });
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
@@ -224,7 +232,7 @@ describe("Worker HTTP Handler", () => {
 		it("handles errors with 500 status", async () => {
 			(getEnabledTenants as any).mockRejectedValue(new Error("DB connection failed"));
 
-			const request = new Request("http://localhost/", { method: "GET" });
+			const request = new Request("http://localhost/", { method: "GET", headers: AUTH_HEADERS });
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
@@ -244,7 +252,10 @@ describe("Worker HTTP Handler", () => {
 				createMockTenant({ tenantId: "t2" }),
 			]);
 
-			const request = new Request("http://localhost/tenants", { method: "GET" });
+			const request = new Request("http://localhost/tenants", {
+				method: "GET",
+				headers: AUTH_HEADERS,
+			});
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
@@ -261,7 +272,10 @@ describe("Worker HTTP Handler", () => {
 		it("with zero tenants returns empty list", async () => {
 			(getEnabledTenants as any).mockResolvedValue([]);
 
-			const request = new Request("http://localhost/tenants", { method: "GET" });
+			const request = new Request("http://localhost/tenants", {
+				method: "GET",
+				headers: AUTH_HEADERS,
+			});
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
@@ -274,7 +288,10 @@ describe("Worker HTTP Handler", () => {
 		it("handles errors with 500 status", async () => {
 			(getEnabledTenants as any).mockRejectedValue(new Error("DB unreachable"));
 
-			const request = new Request("http://localhost/tenants", { method: "GET" });
+			const request = new Request("http://localhost/tenants", {
+				method: "GET",
+				headers: AUTH_HEADERS,
+			});
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
@@ -291,7 +308,10 @@ describe("Worker HTTP Handler", () => {
 		it("returns diagnostic info", async () => {
 			(getEnabledTenants as any).mockResolvedValue([createMockTenant()]);
 
-			const request = new Request("http://localhost/debug", { method: "GET" });
+			const request = new Request("http://localhost/debug", {
+				method: "GET",
+				headers: AUTH_HEADERS,
+			});
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
@@ -309,7 +329,10 @@ describe("Worker HTTP Handler", () => {
 		it("checks KEK presence and length", async () => {
 			(getEnabledTenants as any).mockResolvedValue([]);
 
-			const request = new Request("http://localhost/debug", { method: "GET" });
+			const request = new Request("http://localhost/debug", {
+				method: "GET",
+				headers: AUTH_HEADERS,
+			});
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
@@ -326,7 +349,10 @@ describe("Worker HTTP Handler", () => {
 				createMockTenant({ tenantId: "t2" }),
 			]);
 
-			const request = new Request("http://localhost/debug", { method: "GET" });
+			const request = new Request("http://localhost/debug", {
+				method: "GET",
+				headers: AUTH_HEADERS,
+			});
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
@@ -339,7 +365,10 @@ describe("Worker HTTP Handler", () => {
 		it("returns 200 with dbConnected: false when getEnabledTenants fails", async () => {
 			(getEnabledTenants as any).mockRejectedValue(new Error("Debug failed"));
 
-			const request = new Request("http://localhost/debug", { method: "GET" });
+			const request = new Request("http://localhost/debug", {
+				method: "GET",
+				headers: AUTH_HEADERS,
+			});
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
@@ -348,6 +377,108 @@ describe("Worker HTTP Handler", () => {
 			const data = (await response.json()) as any;
 			expect(data).toHaveProperty("worker", "grove-timeline-sync");
 			expect(data.environment.dbConnected).toBe(false);
+		});
+	});
+
+	// Auth gate — GET /, /tenants, /debug all require a bearer token
+	describe("Admin auth gate", () => {
+		it("rejects GET / with 401 when Authorization header is missing", async () => {
+			(getEnabledTenants as any).mockResolvedValue([createMockTenant()]);
+
+			const request = new Request("http://localhost/", { method: "GET" });
+			const env = createMockEnv();
+
+			const response = await worker.fetch(request, env);
+
+			expect(response.status).toBe(401);
+			expect(processTenantTimeline).not.toHaveBeenCalled();
+		});
+
+		it("rejects GET /tenants with 401 on a wrong token", async () => {
+			const request = new Request("http://localhost/tenants", {
+				method: "GET",
+				headers: { Authorization: "Bearer wrong-key" },
+			});
+			const env = createMockEnv();
+
+			const response = await worker.fetch(request, env);
+
+			expect(response.status).toBe(401);
+		});
+
+		it("rejects GET /debug with 503 when TIMELINE_ADMIN_KEY isn't configured", async () => {
+			const request = new Request("http://localhost/debug", {
+				method: "GET",
+				headers: AUTH_HEADERS,
+			});
+			const env = createMockEnv({ TIMELINE_ADMIN_KEY: undefined });
+
+			const response = await worker.fetch(request, env);
+
+			expect(response.status).toBe(503);
+		});
+
+		it("allows GET / with a correct bearer token", async () => {
+			(getEnabledTenants as any).mockResolvedValue([]);
+
+			const request = new Request("http://localhost/", { method: "GET", headers: AUTH_HEADERS });
+			const env = createMockEnv();
+
+			const response = await worker.fetch(request, env);
+
+			expect(response.status).toBe(200);
+		});
+
+		it("does not gate unmatched routes", async () => {
+			const request = new Request("http://localhost/unknown", { method: "GET" });
+			const env = createMockEnv();
+
+			const response = await worker.fetch(request, env);
+
+			expect(response.status).toBe(200);
+		});
+	});
+
+	// GET /?tenantId= — scope regeneration to a single tenant
+	describe("GET /?tenantId=", () => {
+		it("only processes the matching tenant", async () => {
+			(getEnabledTenants as any).mockResolvedValue([
+				createMockTenant({ tenantId: "t1" }),
+				createMockTenant({ tenantId: "t2" }),
+			]);
+
+			const request = new Request("http://localhost/?tenantId=t2", {
+				method: "GET",
+				headers: AUTH_HEADERS,
+			});
+			const env = createMockEnv();
+
+			const response = await worker.fetch(request, env);
+			const data = (await response.json()) as any;
+
+			expect(processTenantTimeline).toHaveBeenCalledTimes(1);
+			expect(processTenantTimeline).toHaveBeenCalledWith(
+				expect.objectContaining({ tenantId: "t2" }),
+				expect.any(String),
+				env,
+				expect.any(Object),
+			);
+			expect(data.results).toHaveLength(1);
+		});
+
+		it("returns 404 when the tenant isn't found or not enabled", async () => {
+			(getEnabledTenants as any).mockResolvedValue([createMockTenant({ tenantId: "t1" })]);
+
+			const request = new Request("http://localhost/?tenantId=does-not-exist", {
+				method: "GET",
+				headers: AUTH_HEADERS,
+			});
+			const env = createMockEnv();
+
+			const response = await worker.fetch(request, env);
+
+			expect(response.status).toBe(404);
+			expect(processTenantTimeline).not.toHaveBeenCalled();
 		});
 	});
 
