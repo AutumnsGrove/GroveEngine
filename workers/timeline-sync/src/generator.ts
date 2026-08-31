@@ -225,7 +225,9 @@ export async function processTenantTimeline(
 				// on busier days — the model gets cut off mid-object, JSON.parse()
 				// throws, and parseAIResponse() silently swaps in the generic
 				// "got a bit tangled" fallback text instead of surfacing an error.
-				maxTokens: 4096,
+				// Doubled again to 8192 as headroom for tenants with heavier days
+				// than we've tested against.
+				maxTokens: 8192,
 				temperature: 0.7,
 			},
 		});

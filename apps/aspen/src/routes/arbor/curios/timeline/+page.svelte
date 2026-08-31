@@ -461,12 +461,14 @@
 				>
 					{#each data.models as model}
 						<option value={model.id}>
-							{model.name} — ${model.inputCostPer1M}/M in, ${model.outputCostPer1M}/M out
+							{model.name} — ${model.inputCostPer1M}/M in, ${model.outputCostPer1M}/M out{model.isDefault
+								? " (Recommended)"
+								: ""}
 						</option>
 					{/each}
 				</select>
 				<p class="field-help">
-					Choose a model based on quality vs. cost. Claude 3.5 Haiku is recommended.
+					Choose a model based on quality vs. cost — the recommended option is marked above.
 				</p>
 			</div>
 		</GlassCard>
