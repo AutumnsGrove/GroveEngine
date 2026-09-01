@@ -1,15 +1,16 @@
 <script lang="ts">
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Spinner from "@autumnsgrove/lattice/ui/components/ui/Spinner.svelte";
+	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api, getUserDisplayName } from "@autumnsgrove/lattice/utils";
+	import { GroveTour } from "@autumnsgrove/lattice/ui/onboarding";
 	import {
 		actionIcons,
 		authIcons,
-		blazeIcons,
 		featureIcons,
 		metricIcons,
 		natureIcons,
@@ -29,15 +30,7 @@
 
 	let stats = $state<DashboardStats | null>(null);
 	let loading = $state(true);
-
-	// Current roadmap phase config
-	const currentPhase = {
-		key: "thaw",
-		title: "Thaw",
-		subtitle: "The ice begins to crack",
-		description: "Grove opens its doors. The first trees take root.",
-		progress: 33,
-	};
+	let showTutorial = $state(false);
 
 	async function fetchStats() {
 		loading = true;
@@ -74,38 +67,44 @@
 </script>
 
 <div class="max-w-screen-xl">
-	<header class="mb-8">
-		<div class="flex items-center gap-3 mb-2">
-			<h1 class="m-0 text-3xl text-foreground">
-				<GroveTerm interactive term="arbor">Dashboard</GroveTerm>
-			</h1>
-			<a
-				href="https://grove.place/knowledge/help/wanderers-and-pathfinders"
-				target="_blank"
-				rel="noopener noreferrer"
-				class="rooted-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
-				title="You've planted your tree in the grove"
-				aria-label="Learn about being Rooted in Grove"
-			>
-				<natureIcons.treeDeciduous class="w-3.5 h-3.5" />
-				<GroveTerm interactive term="rooted">Rooted</GroveTerm>
-			</a>
-			{#if data.inGreenhouse}
-				<span
-					class="greenhouse-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
-					title="You're in the greenhouse — early access to experimental features"
+	<header class="mb-8 dashboard-header">
+		<div>
+			<div class="flex items-center gap-3 mb-2">
+				<h1 class="m-0 text-3xl text-foreground">
+					<GroveTerm interactive term="arbor">Dashboard</GroveTerm>
+				</h1>
+				<a
+					href="https://grove.place/knowledge/help/wanderers-and-pathfinders"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="rooted-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
+					title="You've planted your tree in the grove"
+					aria-label="Learn about being Rooted in Grove"
 				>
-					<natureIcons.sprout class="w-3.5 h-3.5" />
-					Greenhouse
-				</span>
+					<natureIcons.treeDeciduous class="w-3.5 h-3.5" />
+					<GroveTerm interactive term="rooted">Rooted</GroveTerm>
+				</a>
+				{#if data.inGreenhouse}
+					<span
+						class="greenhouse-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+						title="You're in the greenhouse — early access to experimental features"
+					>
+						<natureIcons.sprout class="w-3.5 h-3.5" />
+						Greenhouse
+					</span>
+				{/if}
+			</div>
+			{#if !groveModeStore.current}
+				<p class="text-sm text-foreground-subtle italic mt-1 mb-0">
+					(<GroveTerm term="arbor" displayOverride="grove" icon />)
+				</p>
 			{/if}
+			<p class="m-0 text-foreground-muted text-lg">Welcome back, {userName}.</p>
 		</div>
-		{#if !groveModeStore.current}
-			<p class="text-sm text-foreground-subtle italic mt-1 mb-0">
-				(<GroveTerm term="arbor" displayOverride="grove" icon />)
-			</p>
-		{/if}
-		<p class="m-0 text-foreground-muted text-lg">Welcome back, {userName}.</p>
+		<Button variant="secondary" onclick={() => (showTutorial = true)}>
+			<navIcons.compass size={16} />
+			View Tutorial
+		</Button>
 	</header>
 
 	<!-- Stats Cards -->
@@ -247,50 +246,43 @@
 			</a>
 		</div>
 	</section>
-
-	<!-- Roadmap Preview -->
-	<section>
-		<a
-			href="https://grove.place/roadmap"
-			target="_blank"
-			rel="noopener noreferrer"
-			aria-label="View Grove roadmap (opens in new tab)"
-			class="roadmap-card glass-roadmap"
-		>
-			<div class="roadmap-header">
-				<div class="roadmap-badge">
-					<blazeIcons.megaphone class="w-4 h-4" />
-					<span>What's New in the Grove</span>
-				</div>
-				<navIcons.arrowRight
-					class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted transition-colors"
-				/>
-			</div>
-
-			<div class="roadmap-content">
-				<div class="roadmap-phase">
-					<div class="phase-indicator">
-						<navIcons.mapPin class="w-4 h-4 text-accent-muted" />
-						<span class="text-xs uppercase tracking-wide text-foreground-subtle">Currently</span>
-					</div>
-					<h3 class="text-xl font-serif text-foreground">{currentPhase.title}</h3>
-					<p class="text-sm text-foreground-muted italic">{currentPhase.subtitle}</p>
-				</div>
-
-				<!-- Progress bar -->
-				<div class="progress-container">
-					<div class="progress-bar">
-						<div class="progress-fill" style="width: {currentPhase.progress}%"></div>
-					</div>
-				</div>
-
-				<p class="text-sm text-foreground-subtle">{currentPhase.description}</p>
-			</div>
-		</a>
-	</section>
 </div>
 
+{#if showTutorial}
+	<div class="tutorial-overlay">
+		<div class="tutorial-overlay-inner">
+			<GroveTour
+				username={data.tenant?.subdomain}
+				onComplete={() => (showTutorial = false)}
+				onSkip={() => (showTutorial = false)}
+			/>
+		</div>
+	</div>
+{/if}
+
 <style>
+	.dashboard-header {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.tutorial-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 50;
+		overflow-y: auto;
+		background: var(--color-background);
+		padding: 1.5rem 1rem;
+	}
+
+	.tutorial-overlay-inner {
+		max-width: 42rem;
+		margin: 0 auto;
+	}
+
 	.stat-card {
 		display: flex;
 		align-items: flex-start;
@@ -381,102 +373,6 @@
 
 	:global(.dark) .action-card:hover {
 		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-	}
-
-	/* Roadmap card */
-	.roadmap-card {
-		display: block;
-		padding: 1.5rem;
-		border-radius: var(--border-radius-standard);
-		text-decoration: none;
-		color: var(--color-text);
-		transition:
-			transform 0.2s,
-			box-shadow 0.2s;
-	}
-
-	.glass-roadmap {
-		background: linear-gradient(135deg, var(--grove-accent-10), var(--grove-accent-5));
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid var(--grove-accent-20);
-	}
-
-	:global(.dark) .glass-roadmap {
-		background: linear-gradient(135deg, var(--grove-accent-15), var(--grove-accent-8));
-		border-color: var(--grove-accent-25);
-	}
-
-	.roadmap-card:hover {
-		transform: scale(1.01);
-		box-shadow: 0 8px 32px var(--grove-accent-15);
-	}
-
-	.roadmap-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1rem;
-	}
-
-	.roadmap-badge {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.375rem 0.75rem;
-		background: var(--grove-accent-15);
-		border-radius: 9999px;
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: var(--grove-accent-dark);
-	}
-
-	:global(.dark) .roadmap-badge {
-		color: var(--grove-accent);
-	}
-
-	.roadmap-content {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.roadmap-phase {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-
-	.phase-indicator {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.progress-container {
-		margin: 0.25rem 0;
-	}
-
-	.progress-bar {
-		height: 0.5rem;
-		background: rgba(0, 0, 0, 0.1);
-		border-radius: 9999px;
-		overflow: hidden;
-	}
-
-	:global(.dark) .progress-bar {
-		background: rgba(255, 255, 255, 0.1);
-	}
-
-	.progress-fill {
-		height: 100%;
-		background: var(--grove-accent-dark);
-		border-radius: 9999px;
-		transition: width 0.5s ease;
-	}
-
-	:global(.dark) .progress-fill {
-		background: var(--grove-accent);
 	}
 
 	/* Rooted badge in header */
