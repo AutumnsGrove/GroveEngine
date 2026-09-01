@@ -9,6 +9,7 @@ import { getUserHomeGrove, listDemoIdentities } from "@autumnsgrove/lattice/serv
 import type { HomeGrove } from "@autumnsgrove/lattice/server/services/users";
 import type { DemoIdentitiesData } from "@autumnsgrove/lattice/ui/components/chrome";
 import { resolveSeasonPreference } from "@autumnsgrove/lattice/ui/season-meta";
+import { isBetaDeployment } from "$lib/server/beta";
 
 /** Default accent color — grove green 600. Matches @autumnsgrove/lattice/config/presets */
 const DEFAULT_ACCENT_COLOR = "#16a34a";
@@ -244,18 +245,10 @@ export const load: LayoutServerLoad = async ({ locals, platform, url, cookies })
 		context.type === "tenant" &&
 		emailsMatch(context.tenant.ownerId, locals.user.email);
 
-	// Locally, there's no real "-beta.grove.place" hostname to check — but the
-	// git branch checked out IS what's actually running, so on localhost we
-	// treat being on the beta branch as equivalent to the real beta chip.
-	// __GIT_BRANCH__ is baked in at build time (see vite.config.ts); gating on
-	// "localhost" keeps this from ever mattering on a real deployment, where
-	// CI checks out main or beta same as any branch build would.
-	const isLocalBetaBranch = url.hostname === "localhost" && __GIT_BRANCH__ === "beta";
-
 	return {
 		user: locals.user || null,
 		context: locals.context as AppContext,
-		isBeta: (locals.isBeta ?? false) || isLocalBetaBranch,
+		isBeta: isBetaDeployment(locals, url),
 		isDemo: locals.isDemoMode ?? false,
 		isOwner,
 		siteSettings,

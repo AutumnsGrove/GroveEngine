@@ -112,7 +112,7 @@ export const load: LayoutServerLoad = async ({ locals, url, platform, parent, co
 
 	// PERFORMANCE: Run independent queries in parallel to reduce navigation latency.
 	// Previously sequential awaits stacked D1 latency (100-300ms each = 1-3s total).
-	// Now: tenant, greenhouse+flags, beta, and messages all run concurrently.
+	// Now: tenant, greenhouse+flags, and messages all run concurrently.
 	// Only getPendingCount depends on flags result, so it runs after.
 
 	const db = platform?.env?.DB;
@@ -120,7 +120,7 @@ export const load: LayoutServerLoad = async ({ locals, url, platform, parent, co
 	const tenantId = locals.tenantId;
 
 	// Phase 1: Run all independent queries in parallel
-	const [tenantResult, flagsResult, betaResult, messagesResult] = await Promise.all([
+	const [tenantResult, flagsResult, messagesResult] = await Promise.all([
 		// Tenant data + ownership verification
 		tenantId && db
 			? db
@@ -147,21 +147,6 @@ export const load: LayoutServerLoad = async ({ locals, url, platform, parent, co
 					}
 				})()
 			: Promise.resolve({ flags: {} as FlagsRecord, inGreenhouse: false }),
-
-		// Beta invite check
-		tenantId && db
-			? db
-					.prepare(
-						`SELECT id FROM comped_invites WHERE used_by_tenant_id = ? AND invite_type = 'beta'`,
-					)
-					.bind(tenantId)
-					.first()
-					.catch((err) => {
-						const errMsg = err instanceof Error ? err.message : String(err);
-						console.warn("[Admin Layout] Failed to check beta status:", errMsg);
-						return null;
-					})
-			: Promise.resolve(null),
 
 		// Channel messages
 		db ? loadChannelMessages(db, "arbor").catch(() => []) : Promise.resolve([]),
@@ -196,7 +181,6 @@ export const load: LayoutServerLoad = async ({ locals, url, platform, parent, co
 	}
 
 	const { flags, inGreenhouse } = flagsResult;
-	const isBeta = !!betaResult;
 	const messages = messagesResult;
 
 	// Phase 2: Pending comment count (always loaded — Reeds is available to all grove owners)
@@ -216,7 +200,6 @@ export const load: LayoutServerLoad = async ({ locals, url, platform, parent, co
 		tenant,
 		flags,
 		inGreenhouse,
-		isBeta,
 		isDemoMode,
 		csrfToken: locals.csrfToken,
 		messages,

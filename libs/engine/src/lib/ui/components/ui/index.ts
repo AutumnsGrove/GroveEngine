@@ -34,7 +34,6 @@ export { default as LogoArchive } from "./LogoArchive.svelte";
 
 // --- Beta ---
 export { default as BetaBadge } from "./BetaBadge.svelte";
-export { default as BetaWelcomeDialog } from "./BetaWelcomeDialog.svelte";
 
 // --- Demo ---
 export { default as DemoBadge } from "./DemoBadge.svelte";

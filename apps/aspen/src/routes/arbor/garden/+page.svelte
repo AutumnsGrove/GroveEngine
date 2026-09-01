@@ -87,7 +87,7 @@
 			</p>
 		</div>
 		<Button variant="primary" onclick={() => (window.location.href = "/arbor/garden/new")}>
-			+ New <GroveTerm interactive term="blooms">Bloom</GroveTerm>
+			+ New <GroveTerm term="blooms">Bloom</GroveTerm>
 		</Button>
 	</header>
 
