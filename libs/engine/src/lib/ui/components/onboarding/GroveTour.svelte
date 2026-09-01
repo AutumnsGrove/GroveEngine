@@ -189,8 +189,16 @@
 				"New features land on the beta channel first — same account, same data, just a preview of what's coming before it reaches everyone else.",
 			location: "your-blog-beta.grove.place",
 			url: null,
-			// TODO(#screenshot): real screenshot pending — see /tour/beta.webp
-			images: [{ url: "/tour/beta.webp", alt: "The Beta chip in Arbor's header" }],
+			images: [
+				{
+					url: "/tour/beta.webp",
+					alt: "A browser address bar showing yourname-beta.grove.place, with the Beta chip visible next to the site title",
+					// Wide browser-chrome crop (684×212) — way off the other
+					// screenshots' near-4:3 shape, so it needs its own ratio
+					// or object-cover crops the right edge off.
+					aspect: "684/212",
+				},
+			],
 		},
 		{
 			id: "complete",
@@ -305,7 +313,10 @@
 					<GlassCarousel images={[...currentTourStop.images]} aspectRatio="4/3" variant="minimal" />
 				</div>
 			{:else if currentTourStop.images.length === 1}
-				<div class="aspect-[4/3] rounded-lg overflow-hidden mb-6 border border-border/40">
+				<div
+					class="rounded-lg overflow-hidden mb-6 border border-border/40"
+					style="aspect-ratio: {currentTourStop.images[0].aspect ?? '4/3'}"
+				>
 					<img
 						src={currentTourStop.images[0].url}
 						alt={currentTourStop.images[0].alt}

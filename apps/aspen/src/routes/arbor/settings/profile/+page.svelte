@@ -62,6 +62,7 @@
 	let toggleGraftEnabled = $state("");
 
 	// Display name state
+	// svelte-ignore state_referenced_locally
 	let displayName = $state(data.context?.type === "tenant" ? data.context.tenant.name : "");
 	let savingDisplayName = $state(false);
 

@@ -8,6 +8,7 @@
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api, getUserDisplayName } from "@autumnsgrove/lattice/utils";
 	import { GroveTour } from "@autumnsgrove/lattice/ui/onboarding";
+	import { sidebarStore } from "@autumnsgrove/lattice/ui/arbor";
 	import {
 		actionIcons,
 		authIcons,
@@ -31,6 +32,10 @@
 	let stats = $state<DashboardStats | null>(null);
 	let loading = $state(true);
 	let showTutorial = $state(false);
+	// Overlay is fixed-position, so it needs its own sidebar-aware inset —
+	// it doesn't inherit .arbor-content's margin-left the way normal page
+	// content does. Mirrors ArborPanel's own 250px/72px + mobile breakpoint.
+	let sidebarCollapsed = $derived(sidebarStore.collapsed);
 
 	async function fetchStats() {
 		loading = true;
@@ -249,7 +254,7 @@
 </div>
 
 {#if showTutorial}
-	<div class="tutorial-overlay">
+	<div class="tutorial-overlay" class:collapsed={sidebarCollapsed}>
 		<div class="tutorial-overlay-inner">
 			<GroveTour
 				username={data.tenant?.subdomain}
@@ -271,16 +276,34 @@
 
 	.tutorial-overlay {
 		position: fixed;
-		inset: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		/* Sidebar-aware: fixed positioning ignores .arbor-content's margin-left,
+		   so it needs the same 250px/72px inset ArborPanel uses, or it centers
+		   across the whole viewport instead of the usable content area. */
+		left: calc(250px + 0.75rem);
 		z-index: 50;
 		overflow-y: auto;
 		background: var(--color-background);
 		padding: 1.5rem 1rem;
+		transition: left 0.3s ease;
+	}
+
+	.tutorial-overlay.collapsed {
+		left: calc(72px + 0.75rem);
 	}
 
 	.tutorial-overlay-inner {
 		max-width: 42rem;
 		margin: 0 auto;
+	}
+
+	@media (max-width: 768px) {
+		.tutorial-overlay,
+		.tutorial-overlay.collapsed {
+			left: 0;
+		}
 	}
 
 	.stat-card {

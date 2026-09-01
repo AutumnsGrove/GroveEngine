@@ -15,22 +15,23 @@
 		return { value: i, label };
 	});
 
-	// Get common timezones for the dropdown
-	let timezones: string[] = [];
-	try {
-		timezones = Intl.supportedValuesOf("timeZone");
-	} catch {
-		timezones = [
-			"America/New_York",
-			"America/Chicago",
-			"America/Denver",
-			"America/Los_Angeles",
-			"Europe/London",
-			"Europe/Paris",
-			"Asia/Tokyo",
-			"Australia/Sydney",
-		];
-	}
+	// Get common timezones for the dropdown — computed once, never reassigned
+	const timezones: string[] = (() => {
+		try {
+			return Intl.supportedValuesOf("timeZone");
+		} catch {
+			return [
+				"America/New_York",
+				"America/Chicago",
+				"America/Denver",
+				"America/Los_Angeles",
+				"Europe/London",
+				"Europe/Paris",
+				"Asia/Tokyo",
+				"Australia/Sydney",
+			];
+		}
+	})();
 </script>
 
 <svelte:head>
