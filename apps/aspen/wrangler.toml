@@ -86,6 +86,7 @@ migrations_dir = "../../libs/engine/migrations"
 binding = "CURIO_DB"
 database_name = "grove-curios-db"
 database_id = "b03756ad-30d7-427a-9a1b-ec2f6478fcbd"
+migrations_dir = "../../libs/engine/migrations/curios"
 
 # =============================================================================
 # Workers AI - For Petal image moderation (Llama 4 Scout vision)
@@ -211,6 +212,7 @@ migrations_dir = "../../libs/engine/migrations"
 binding = "CURIO_DB"
 database_name = "grove-curios-db"
 database_id = "b03756ad-30d7-427a-9a1b-ec2f6478fcbd"
+migrations_dir = "../../libs/engine/migrations/curios"
 
 [env.beta.ai]
 binding = "AI"

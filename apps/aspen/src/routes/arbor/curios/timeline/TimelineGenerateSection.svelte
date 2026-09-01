@@ -170,3 +170,192 @@
 		{/if}
 	</div>
 </GlassCard>
+
+<style>
+	.generate-description {
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+		line-height: 1.6;
+		margin-bottom: 1.5rem;
+	}
+
+	.generate-fields {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.field-group {
+		margin-bottom: 1.25rem;
+	}
+
+	.field-group:last-child {
+		margin-bottom: 0;
+	}
+
+	.field-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-text);
+		margin-bottom: 0.5rem;
+	}
+
+	.required {
+		color: hsl(var(--destructive));
+	}
+
+	.field-input {
+		width: 100%;
+		padding: 0.75rem 1rem;
+		background: var(--grove-overlay-4);
+		border: 1px solid var(--grove-overlay-12);
+		border-radius: var(--border-radius-standard);
+		color: var(--color-text);
+		font-size: 0.9rem;
+		transition:
+			border-color 0.15s,
+			box-shadow 0.15s;
+	}
+
+	.field-input:focus {
+		outline: none;
+		border-color: var(--color-primary);
+		box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
+	}
+
+	.field-input:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.field-help {
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
+		margin-top: 0.5rem;
+		line-height: 1.5;
+	}
+
+	.generate-progress {
+		margin: 1.5rem 0;
+	}
+
+	.progress-bar-container {
+		width: 100%;
+		height: 6px;
+		background: var(--grove-overlay-8);
+		border-radius: 3px;
+		overflow: hidden;
+		margin-bottom: 0.75rem;
+	}
+
+	.progress-bar-fill {
+		height: 100%;
+		background: var(--color-primary);
+		border-radius: 3px;
+		transition: width 0.3s ease;
+	}
+
+	.progress-details {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.progress-current {
+		font-size: 0.85rem;
+		color: var(--color-text-muted);
+	}
+
+	.progress-stats {
+		display: flex;
+		gap: 0.75rem;
+		font-size: 0.8rem;
+	}
+
+	.stat-generated {
+		color: var(--grove-accent);
+	}
+
+	.stat-skipped {
+		color: var(--color-text-muted);
+	}
+
+	.stat-failed {
+		color: hsl(var(--destructive));
+	}
+
+	.stat-cost {
+		color: var(--color-primary);
+		font-weight: 500;
+	}
+
+	.alert {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 1rem;
+		border-radius: var(--border-radius-standard);
+		margin-bottom: 1.5rem;
+	}
+
+	.alert-error {
+		background: hsl(var(--destructive) / 0.1);
+		border: 1px solid hsl(var(--destructive) / 0.2);
+		color: hsl(var(--destructive));
+	}
+
+	.alert-success {
+		background: var(--grove-accent-10);
+		border: 1px solid var(--grove-accent-30);
+		color: var(--grove-accent);
+	}
+
+	.generate-result-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.failed-details {
+		font-size: 0.8rem;
+		opacity: 0.9;
+	}
+
+	.failed-details summary {
+		cursor: pointer;
+		color: var(--color-text-muted);
+	}
+
+	.failed-list {
+		margin: 0.5rem 0 0 0;
+		padding-left: 1.25rem;
+		list-style: disc;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.failed-list li {
+		word-break: break-word;
+	}
+
+	.form-actions {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 1rem;
+		margin-top: 2rem;
+	}
+
+	@media (max-width: 640px) {
+		.generate-fields {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
