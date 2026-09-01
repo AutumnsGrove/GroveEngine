@@ -197,6 +197,17 @@ seed_data() {
                 -c apps/aspen/wrangler.toml \
                 --file scripts/db/seed-tenant-003.sql \
                 -y 2>&1 | tail -3
+
+            # Comped/beta invite rows for apps/landing's Wayfinder-only
+            # /arbor/comped-invites admin page — pending, used, and legacy
+            # "beta"-typed invites so the list/filter/audit views have real
+            # data instead of an empty state.
+            dim "  → Comped invites (pending, used, legacy beta)"
+            wrangler d1 execute grove-engine-db \
+                --local \
+                -c apps/aspen/wrangler.toml \
+                --file scripts/db/seed-comped-invites.sql \
+                -y 2>&1 | tail -3
             ;;
         empty)
             dim "  → Empty tenant (defaults only)"
@@ -276,6 +287,22 @@ print_demo_tenant_urls() {
     echo -e "  ${DIM}(first visit sets grove_demo_mode + grove_local_subdomain cookies)${RESET}"
 }
 
+# Aspen's isBetaDeployment (apps/aspen/src/lib/server/beta.ts) auto-activates
+# on localhost when the checked-out branch is "beta" — no special URL or
+# query param needed, unlike the demo-login bypasses above. Surfaced here so
+# it's obvious why the Header's Beta pill / Greenhouse card's "Beta Access"
+# copy is (or isn't) showing, without having to go read the source.
+print_aspen_branch_note() {
+    local branch
+    branch=$(git branch --show-current 2>/dev/null)
+    if [ "$branch" = "beta" ]; then
+        echo -e "  ${CYAN}Branch:${RESET} beta — isBetaDeployment is auto-true on localhost"
+        echo -e "  ${DIM}(Header shows the Beta pill, Greenhouse card shows \"Beta Access\" — no ?demo= needed for this part)${RESET}"
+    else
+        echo -e "  ${DIM}Branch: ${branch:-unknown} — isBetaDeployment is false locally (checkout beta to test it)${RESET}"
+    fi
+}
+
 # Same idea as demo_login_url() above, but for Plant's onboarding bypass —
 # reads apps/plant/.dev.vars separately since it's a different worker's
 # secret store, even though both apps use the same DEMO_MODE_SECRET value
@@ -293,6 +320,26 @@ plant_demo_url() {
     fi
 
     echo "http://localhost:5175/auth/demo?demo=$secret"
+}
+
+# Same idea again, but for Landing's Wayfinder-only /arbor (staff tools like
+# comped-invites) — reads apps/landing/.dev.vars. Unlike Aspen/Plant's demo
+# bypass (a stand-in tenant owner), this one logs in as a real Wayfinder
+# identity, since every page under /arbor here gates on isWayfinder(email),
+# not tenant ownership. See apps/landing/src/routes/arbor/+layout.server.ts.
+landing_arbor_demo_url() {
+    local dev_vars="apps/landing/.dev.vars"
+    if [ ! -f "$dev_vars" ]; then
+        return 1
+    fi
+
+    local secret
+    secret=$(grep -E "^DEMO_MODE_SECRET=" "$dev_vars" | head -1 | cut -d= -f2-)
+    if [ -z "$secret" ]; then
+        return 1
+    fi
+
+    echo "http://localhost:5174/arbor?demo=$secret"
 }
 
 # ── Workers ───────────────────────────────────────────────────────────
@@ -477,11 +524,16 @@ main() {
             seed_data "blog"
             start_workers
             echo ""
-            local plant_url
+            local plant_url landing_url
             print_demo_tenant_urls
+            print_aspen_branch_note
             if plant_url=$(plant_demo_url); then
                 echo -e "  ${CYAN}Plant demo signup:${RESET} $plant_url"
                 echo -e "  ${DIM}(or click \"Skip sign-in (Dev Mode)\" on http://localhost:5175)${RESET}"
+            fi
+            if [ "${landing_ready:-0}" -eq 1 ] && landing_url=$(landing_arbor_demo_url); then
+                echo -e "  ${CYAN}Landing Wayfinder /arbor:${RESET} $landing_url"
+                echo -e "  ${DIM}(comped-invites, greenhouse, porch — logs in as a real Wayfinder identity)${RESET}"
             fi
             echo ""
             log "Workers running. Press Ctrl+C to stop."
@@ -502,13 +554,22 @@ main() {
             echo -e "  ${CYAN}DOs:${RESET}       via service binding (grove-durable-objects)"
             echo -e "  ${CYAN}Email:${RESET}     via service binding (grove-zephyr)"
             echo ""
-            local plant_url
+            local plant_url landing_url
             print_demo_tenant_urls
+            print_aspen_branch_note
             if plant_url=$(plant_demo_url); then
                 echo -e "  ${CYAN}Plant demo signup:${RESET} $plant_url"
                 echo -e "  ${DIM}(or click \"Skip sign-in (Dev Mode)\" on http://localhost:5175)${RESET}"
             else
                 warn "DEMO_MODE_SECRET not found in apps/plant/.dev.vars — Plant demo signup unavailable"
+            fi
+            if [ "${landing_ready:-0}" -eq 1 ]; then
+                if landing_url=$(landing_arbor_demo_url); then
+                    echo -e "  ${CYAN}Landing Wayfinder /arbor:${RESET} $landing_url"
+                    echo -e "  ${DIM}(comped-invites, greenhouse, porch — logs in as a real Wayfinder identity)${RESET}"
+                else
+                    warn "DEMO_MODE_SECRET not found in apps/landing/.dev.vars — Landing /arbor demo unavailable"
+                fi
             fi
             echo ""
             log "Press Ctrl+C to stop all services."

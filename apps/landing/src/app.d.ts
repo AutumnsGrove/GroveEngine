@@ -33,6 +33,8 @@ declare global {
 				ADMIN_EMAILS: string;
 				/** GroveAuth Service Binding (Heartwood - fast session validation) */
 				AUTH: Fetcher;
+				/** Local-dev-only Wayfinder /arbor bypass via ?demo=<secret> — unset in production */
+				DEMO_MODE_SECRET?: string;
 				/** Optional KV namespace for caching and rate limiting */
 				CACHE_KV?: KVNamespace;
 				/** Alias for CACHE_KV (rate limiting) */
