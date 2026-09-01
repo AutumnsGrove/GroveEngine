@@ -90,6 +90,7 @@ export async function fetchGitHubCommits(
 			config.githubUsername,
 			githubToken,
 			targetDate,
+			config.timezone,
 		);
 		allCommits.push(...repoCommits);
 
@@ -197,7 +198,19 @@ async function fetchUserRepos(
 }
 
 /**
- * Fetch commits for a specific repo on a single date.
+ * How many days of merge/rebase lag to absorb on each side of the target
+ * date. GitHub's `since`/`until` params on the commits list endpoint filter
+ * by *committer* date, not author date — a commit written today but merged
+ * (or rebased) tomorrow gets a tomorrow committer timestamp while keeping
+ * today's author timestamp. Without this margin, that commit silently
+ * vanishes from every day's window it's queried under. We fetch wide on
+ * committer date, then filter narrow on author date below.
+ */
+const AUTHOR_DATE_WINDOW_DAYS = 3;
+
+/**
+ * Fetch commits for a specific repo, attributed to a single calendar date
+ * in the tenant's own timezone.
  * Uses the Commits API which has no 90-day limit.
  */
 async function fetchRepoCommitsForDate(
@@ -205,13 +218,15 @@ async function fetchRepoCommitsForDate(
 	authorUsername: string,
 	token: string,
 	date: string,
+	timezone: string,
 ): Promise<Commit[]> {
 	const commits: Commit[] = [];
 	let page = 1;
 	const perPage = 100;
 
-	const sinceDate = `${date}T00:00:00Z`;
-	const untilDate = `${date}T23:59:59Z`;
+	const target = new Date(`${date}T00:00:00Z`).getTime();
+	const sinceDate = new Date(target - AUTHOR_DATE_WINDOW_DAYS * 86400000).toISOString();
+	const untilDate = new Date(target + (AUTHOR_DATE_WINDOW_DAYS + 1) * 86400000).toISOString();
 
 	while (true) {
 		const url = new URL(`https://api.github.com/repos/${repoFullName}/commits`);
@@ -247,6 +262,10 @@ async function fetchRepoCommitsForDate(
 		const repoName = repoFullName.split("/")[1];
 
 		for (const commit of pageCommits) {
+			// Filter on author date (when the work actually happened), not
+			// the committer-date window we widened the query to.
+			if (!isSameLocalDate(commit.commit.author.date, date, timezone)) continue;
+
 			commits.push({
 				sha: commit.sha,
 				message: commit.commit.message,
@@ -268,6 +287,20 @@ async function fetchRepoCommitsForDate(
 	}
 
 	return commits;
+}
+
+/**
+ * Does this ISO timestamp fall on `targetDate` (YYYY-MM-DD) in `timezone`?
+ * "en-CA" formats as YYYY-MM-DD, matching our date-string convention.
+ */
+function isSameLocalDate(isoDate: string, targetDate: string, timezone: string): boolean {
+	const local = new Intl.DateTimeFormat("en-CA", {
+		timeZone: timezone,
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+	}).format(new Date(isoDate));
+	return local === targetDate;
 }
 
 function sleep(ms: number): Promise<void> {

@@ -95,7 +95,11 @@ function createMockCommit(overrides: Partial<Commit> = {}): Commit {
 
 describe("fetchGitHubCommits", () => {
 	beforeEach(() => {
-		fetchMock.mockClear();
+		// mockReset (not mockClear) to drain any leftover mockResolvedValueOnce
+		// queue between tests — mockClear only clears history, not the
+		// once-queue, so an over-queued response in one test silently bleeds
+		// into the next test's first fetch() call.
+		fetchMock.mockReset();
 	});
 
 	afterEach(() => {
@@ -416,6 +420,93 @@ describe("fetchGitHubCommits", () => {
 			const commits = await fetchGitHubCommits(config, "token123", "2026-03-11", db);
 
 			expect(commits).toHaveLength(150);
+		});
+	});
+
+	// Author-date vs committer-date window (rebase/squash-merge lag)
+	describe("author-date vs committer-date window", () => {
+		it("includes a commit authored on the target day even when GitHub's since/until (committer date) would otherwise miss it", async () => {
+			const db = createMockDb(null);
+			const config = createMockConfig();
+			const repos = [createMockRepo()];
+
+			const commitDetail = createMockCommitDetail({
+				sha: "rebase-lag-sha",
+				commit: {
+					message: "Work from the target day, merged later",
+					author: { date: "2026-03-11T20:00:00Z", name: "Test", email: "test@test.com" },
+				},
+			});
+
+			fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(repos), { status: 200 }));
+			fetchMock.mockResolvedValueOnce(
+				new Response(JSON.stringify([commitDetail]), { status: 200 }),
+			);
+
+			const commits = await fetchGitHubCommits(config, "token123", "2026-03-11", db);
+
+			expect(commits).toHaveLength(1);
+			expect(commits[0].sha).toBe("rebase-lag-sha");
+
+			// The query window must be widened well beyond a single calendar
+			// day to have any chance of catching commits with committer-date
+			// lag — this is what makes the above possible server-side.
+			const commitsUrl = fetchMock.mock.calls
+				.map((c) => c[0].toString())
+				.find((u) => u.includes("/commits?"));
+			const url = new URL(commitsUrl!);
+			const since = new Date(url.searchParams.get("since")!);
+			const until = new Date(url.searchParams.get("until")!);
+			expect(until.getTime() - since.getTime()).toBeGreaterThan(24 * 60 * 60 * 1000);
+		});
+
+		it("excludes a commit returned by the widened window whose author date is a different day", async () => {
+			const db = createMockDb(null);
+			const config = createMockConfig();
+			const repos = [createMockRepo()];
+
+			const wrongDayCommit = createMockCommitDetail({
+				sha: "wrong-day-sha",
+				commit: {
+					message: "Authored the day before",
+					author: { date: "2026-03-10T23:00:00Z", name: "Test", email: "test@test.com" },
+				},
+			});
+
+			fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(repos), { status: 200 }));
+			fetchMock.mockResolvedValueOnce(
+				new Response(JSON.stringify([wrongDayCommit]), { status: 200 }),
+			);
+
+			const commits = await fetchGitHubCommits(config, "token123", "2026-03-11", db);
+
+			expect(commits).toHaveLength(0);
+		});
+
+		it("attributes a commit to the tenant's local calendar day, not raw UTC", async () => {
+			const db = createMockDb(null);
+			// DST-adjusted EDT (UTC-4) by mid-March. 02:30 UTC on the 12th is
+			// 10:30pm EDT the night before — still "the 11th" for the tenant.
+			const config = createMockConfig({ timezone: "America/New_York" });
+			const repos = [createMockRepo()];
+
+			const eveningCommit = createMockCommitDetail({
+				sha: "evening-sha",
+				commit: {
+					message: "Late evening EDT work",
+					author: { date: "2026-03-12T02:30:00Z", name: "Test", email: "test@test.com" },
+				},
+			});
+
+			fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(repos), { status: 200 }));
+			fetchMock.mockResolvedValueOnce(
+				new Response(JSON.stringify([eveningCommit]), { status: 200 }),
+			);
+
+			const commits = await fetchGitHubCommits(config, "token123", "2026-03-11", db);
+
+			expect(commits).toHaveLength(1);
+			expect(commits[0].sha).toBe("evening-sha");
 		});
 	});
 });
