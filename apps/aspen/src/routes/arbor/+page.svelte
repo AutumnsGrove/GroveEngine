@@ -2,8 +2,6 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Spinner from "@autumnsgrove/lattice/ui/components/ui/Spinner.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
-	import BetaBadge from "@autumnsgrove/lattice/ui/components/ui/BetaBadge.svelte";
-	import BetaWelcomeDialog from "@autumnsgrove/lattice/ui/components/ui/BetaWelcomeDialog.svelte";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
@@ -100,9 +98,6 @@
 					<natureIcons.sprout class="w-3.5 h-3.5" />
 					Greenhouse
 				</span>
-			{/if}
-			{#if data.isBeta}
-				<BetaBadge />
 			{/if}
 		</div>
 		{#if !groveModeStore.current}
@@ -294,10 +289,6 @@
 		</a>
 	</section>
 </div>
-
-{#if data.isBeta}
-	<BetaWelcomeDialog autoShow {userName} feedbackUrl="https://grove.place/feedback" />
-{/if}
 
 <style>
 	.stat-card {
