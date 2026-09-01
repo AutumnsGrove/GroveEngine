@@ -40,6 +40,16 @@ function getDemoWayfinderUser() {
 	};
 }
 
+// Landing has no real "-beta.grove.place" deployment of its own (only Aspen
+// does — see docs/plans/planned/beta-environment-architecture.md), so unlike
+// apps/aspen/src/lib/server/beta.ts, there's no remote signal to check here.
+// This is just the local-branch half of that same idea: show the chip when
+// the beta branch is checked out locally, gated to localhost so it can never
+// mean anything on a real deployment.
+function isLocalBetaBranch(url: URL): boolean {
+	return url.hostname === "localhost" && __GIT_BRANCH__ === "beta";
+}
+
 export const load: LayoutServerLoad = async ({ locals, url, platform, cookies }) => {
 	// Allow access to login page (its +page.server.ts handles the redirect to login hub)
 	if (url.pathname === "/arbor/login") {
@@ -89,6 +99,8 @@ export const load: LayoutServerLoad = async ({ locals, url, platform, cookies })
 	return {
 		user,
 		isWayfinder: wayfinderCheck,
+		isDemoMode,
+		isBeta: isLocalBetaBranch(url),
 		messages,
 	};
 };
