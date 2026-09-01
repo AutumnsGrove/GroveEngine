@@ -110,7 +110,13 @@
 	{@render children()}
 {:else}
 	<!-- Chrome Header with sidebar toggle (matches engine's arbor pattern) -->
-	<Header showSidebarToggle={true} user={headerUser} userHref="/arbor" />
+	<Header
+		showSidebarToggle={true}
+		user={headerUser}
+		userHref="/arbor"
+		isDemo={data.isDemoMode}
+		isBeta={data.isBeta}
+	/>
 
 	<ArborPanel
 		{navItems}

@@ -13,10 +13,22 @@
 		signInLabel?: string;
 		userHref?: string;
 		showSidebarToggle?: boolean;
+		/** Shows the same "Demo" chip Aspen shows when ?demo=<secret> is active */
+		isDemo?: boolean;
+		/** Shows the same "Beta" chip Aspen shows — here, purely a local-branch signal (see arbor/+layout.server.ts) */
+		isBeta?: boolean;
 	}
 
-	let { maxWidth, user, signInHref, signInLabel, userHref, showSidebarToggle = false }: Props =
-		$props();
+	let {
+		maxWidth,
+		user,
+		signInHref,
+		signInLabel,
+		userHref,
+		showSidebarToggle = false,
+		isDemo = false,
+		isBeta = false,
+	}: Props = $props();
 </script>
 
 <EngineHeader
@@ -28,4 +40,6 @@
 	{signInLabel}
 	{userHref}
 	{showSidebarToggle}
+	{isDemo}
+	{isBeta}
 />

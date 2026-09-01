@@ -1,6 +1,9 @@
 /// <reference types="@cloudflare/workers-types" />
 
 declare global {
+	/** Git branch at build time — see vite.config.ts. Local dev only; do not use for anything security-sensitive. */
+	const __GIT_BRANCH__: string;
+
 	namespace App {
 		interface Locals {
 			user: {
