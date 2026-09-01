@@ -79,17 +79,46 @@ export default {
 
 	/**
 	 * HTTP handler - for manual testing and status overview.
+	 *
+	 * Every route below is gated by requireAdminAuth(): this worker has no
+	 * per-tenant auth of its own, `/` regenerates timelines for every enabled
+	 * tenant (spending their real GitHub/OpenRouter quota) in one call, and
+	 * `/debug` dumps per-tenant secret/DEK existence. None of that is safe
+	 * to leave open on a reachable *.workers.dev URL.
 	 */
 	async fetch(request: Request, env: Env): Promise<Response> {
 		const url = new URL(request.url);
 		const ctx = createContext(env);
 
-		// GET / - Run sync for yesterday (for manual testing)
+		const isGatedRoute =
+			request.method === "GET" &&
+			(url.pathname === "/" || url.pathname === "/tenants" || url.pathname === "/debug");
+
+		if (isGatedRoute) {
+			const authError = requireAdminAuth(request, env);
+			if (authError) return authError;
+		}
+
+		// GET / - Run sync for yesterday (for manual testing).
+		// Pass ?tenantId=<id> to scope to a single tenant instead of every
+		// enabled tenant — the default (no filter) still processes everyone,
+		// matching cron behavior, but callers should prefer scoping down.
 		if (request.method === "GET" && url.pathname === "/") {
 			const targetDate = url.searchParams.get("date") || getYesterdayUTC();
+			const tenantIdFilter = url.searchParams.get("tenantId");
 
 			try {
-				const tenants = await getEnabledTenants(ctx.db);
+				const allTenants = await getEnabledTenants(ctx.db);
+				const tenants = tenantIdFilter
+					? allTenants.filter((t) => t.tenantId === tenantIdFilter)
+					: allTenants;
+
+				if (tenantIdFilter && tenants.length === 0) {
+					return Response.json(
+						{ success: false, error: `Tenant ${tenantIdFilter} not found or not enabled` },
+						{ status: 404 },
+					);
+				}
 
 				if (tenants.length === 0) {
 					return Response.json({
@@ -341,6 +370,48 @@ export default {
 // =============================================================================
 // Helpers
 // =============================================================================
+
+/**
+ * Gate the manual-trigger/debug routes behind a bearer token.
+ * Fails closed: if TIMELINE_ADMIN_KEY isn't configured, every gated route is
+ * blocked rather than silently left open.
+ * Set via: gw secret apply TIMELINE_ADMIN_KEY --worker grove-timeline-sync
+ */
+function requireAdminAuth(request: Request, env: Env): Response | null {
+	if (!env.TIMELINE_ADMIN_KEY) {
+		return Response.json(
+			{
+				success: false,
+				error: "TIMELINE_ADMIN_KEY not configured — manual-trigger routes are disabled",
+			},
+			{ status: 503 },
+		);
+	}
+
+	const authHeader = request.headers.get("Authorization");
+	const [scheme, token] = authHeader?.split(" ") ?? [];
+
+	if (scheme !== "Bearer" || !token || !timingSafeEqual(token, env.TIMELINE_ADMIN_KEY)) {
+		return Response.json(
+			{ success: false, error: "Unauthorized — use Authorization: Bearer <TIMELINE_ADMIN_KEY>" },
+			{ status: 401 },
+		);
+	}
+
+	return null;
+}
+
+/**
+ * Constant-time string comparison to prevent timing attacks.
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+	const maxLength = Math.max(a.length, b.length);
+	let result = a.length ^ b.length;
+	for (let i = 0; i < maxLength; i++) {
+		result |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
+	}
+	return result === 0;
+}
 
 /**
  * Get yesterday's date in UTC (YYYY-MM-DD format).

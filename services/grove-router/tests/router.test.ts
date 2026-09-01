@@ -725,15 +725,13 @@ describe("Grove Router", () => {
 			expect(response.headers.get("content-disposition")).toBe("inline");
 		});
 
-		it("allows inline display for SVG (mapped type)", async () => {
-			// SVG is in the content-type map as image/svg+xml
-			// image/svg+xml is NOT in dangerousTypes, so it gets inline
-			env.CDN._seedObject("graphic.svg", "<svg></svg>");
+		it("forces download for SVG (can carry <script>, executes if served inline)", async () => {
+			env.CDN._seedObject("graphic.svg", "<svg><script>alert(1)</script></svg>");
 			const request = createRequest("cdn", "/graphic.svg");
 			const response = await router.fetch(request, env);
 
 			expect(response.headers.get("content-type")).toBe("image/svg+xml");
-			expect(response.headers.get("content-disposition")).toBe("inline");
+			expect(response.headers.get("content-disposition")).toBe("attachment");
 		});
 
 		it("serves unknown extensions as octet-stream with inline", async () => {

@@ -139,3 +139,27 @@ export async function logTokenRevoke(
 		user_agent: context.user_agent,
 	});
 }
+
+/**
+ * Log detection of a refresh token being reused after it was already rotated.
+ * Per RFC 6819 §5.2.2.3, an already-consumed refresh token being presented
+ * again is the canonical signal that a copy was stolen — the caller is
+ * expected to have already revoked the user's entire token family.
+ */
+export async function logRefreshTokenReuse(
+	db: D1DatabaseOrSession,
+	userId: string,
+	context: {
+		client_id?: string;
+		ip_address?: string;
+		user_agent?: string;
+	},
+): Promise<void> {
+	await createAuditLog(db, {
+		event_type: "refresh_token_reuse_detected",
+		user_id: userId,
+		client_id: context.client_id,
+		ip_address: context.ip_address,
+		user_agent: context.user_agent,
+	});
+}

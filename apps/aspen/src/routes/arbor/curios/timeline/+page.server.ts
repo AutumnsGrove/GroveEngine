@@ -73,9 +73,13 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	// Parse JSON fields if config exists
 	let parsedConfig = null;
 	if (config) {
-		// Check for tokens in both SecretsManager and legacy columns
+		// Check for tokens in both SecretsManager and legacy columns.
+		// SecretsManager's tenant_secrets/tenants tables live in the main
+		// engine DB, not CURIO_DB — passing `db` (CURIO_DB) here always
+		// throws "no such table: tenant_secrets", silently caught and
+		// falling back to the legacy column check every time.
 		const env = {
-			DB: db,
+			DB: platform?.env?.DB as D1Database,
 			GROVE_KEK: platform?.env?.GROVE_KEK,
 			TOKEN_ENCRYPTION_KEY: platform?.env?.TOKEN_ENCRYPTION_KEY,
 		};
@@ -215,8 +219,10 @@ export const actions: Actions = {
 		try {
 			// Token handling using SecretsManager (preferred) or legacy encryption
 			// Token handling: null = preserve existing, CLEAR_TOKEN_VALUE = delete, "value" = set new
+			// SecretsManager's tenant_secrets/tenants tables live in the main
+			// engine DB, not CURIO_DB (`db` above) — see same fix in load().
 			const env = {
-				DB: db,
+				DB: platform?.env?.DB as D1Database,
 				GROVE_KEK: platform?.env?.GROVE_KEK,
 				TOKEN_ENCRYPTION_KEY: platform?.env?.TOKEN_ENCRYPTION_KEY,
 			};

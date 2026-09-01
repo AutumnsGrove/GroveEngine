@@ -85,6 +85,14 @@ export const HW_SVC_ERRORS = {
 	// Internal Errors (080-099)
 	// ─────────────────────────────────────────────────────────────────────────
 
+	SESSION_BRIDGE_FAILED: {
+		code: "HW-SVC-080",
+		category: "bug" as const,
+		userMessage: "We couldn't finish signing you in. Please try again.",
+		adminMessage:
+			"Better Auth session was not bridged to SessionDO — user has a valid Better Auth session but no grove_session.",
+	},
+
 	INTERNAL_ERROR: {
 		code: "HW-SVC-099",
 		category: "bug" as const,

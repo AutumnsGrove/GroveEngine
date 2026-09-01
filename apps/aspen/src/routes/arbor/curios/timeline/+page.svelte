@@ -15,9 +15,15 @@
 		navIcons,
 		stateIcons,
 		phaseIcons,
+		featureIcons,
 	} from "@autumnsgrove/prism/icons";
 	const Calendar = metricIcons.calendar;
-	const Github = chromeIcons.github;
+	// chromeIcons.github resolves to undefined: @lucide/svelte dropped brand/
+	// logo icons (Github, Chrome, Codepen, ...) and Prism's manifest still
+	// maps them, so the lookup silently returns nothing instead of a
+	// component. GitBranch is the closest source-control icon that still
+	// exists in the installed lucide package.
+	const Github = featureIcons.gitBranch;
 	const Key = authIcons.keyLegacy;
 	const Bot = toolIcons.shade;
 	const Mic2 = chromeIcons.mic;
@@ -455,12 +461,14 @@
 				>
 					{#each data.models as model}
 						<option value={model.id}>
-							{model.name} — ${model.inputCostPer1M}/M in, ${model.outputCostPer1M}/M out
+							{model.name} — ${model.inputCostPer1M}/M in, ${model.outputCostPer1M}/M out{model.isDefault
+								? " (Recommended)"
+								: ""}
 						</option>
 					{/each}
 				</select>
 				<p class="field-help">
-					Choose a model based on quality vs. cost. Claude 3.5 Haiku is recommended.
+					Choose a model based on quality vs. cost — the recommended option is marked above.
 				</p>
 			</div>
 		</GlassCard>
@@ -992,32 +1000,6 @@
 		padding-top: 1.5rem;
 	}
 
-	.backfill-description {
-		color: var(--color-text-muted);
-		font-size: 0.9rem;
-		line-height: 1.6;
-		margin-bottom: 1.5rem;
-	}
-
-	.backfill-fields {
-		display: grid;
-		grid-template-columns: 1fr 1fr 1fr;
-		gap: 1rem;
-	}
-
-	.backfill-result-content {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-
-	.backfill-stats {
-		display: flex;
-		gap: 0.5rem;
-		font-size: 0.8rem;
-		opacity: 0.8;
-	}
-
 	:global(.spinning) {
 		animation: spin 1s linear infinite;
 	}
@@ -1042,105 +1024,6 @@
 		margin-top: 1.5rem;
 	}
 
-	.generate-description {
-		color: var(--color-text-muted);
-		font-size: 0.9rem;
-		line-height: 1.6;
-		margin-bottom: 1.5rem;
-	}
-
-	.generate-fields {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 1rem;
-		margin-bottom: 1rem;
-	}
-
-	.generate-progress {
-		margin: 1.5rem 0;
-	}
-
-	.progress-bar-container {
-		width: 100%;
-		height: 6px;
-		background: var(--grove-overlay-8);
-		border-radius: 3px;
-		overflow: hidden;
-		margin-bottom: 0.75rem;
-	}
-
-	.progress-bar-fill {
-		height: 100%;
-		background: var(--color-primary);
-		border-radius: 3px;
-		transition: width 0.3s ease;
-	}
-
-	.progress-details {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-	}
-
-	.progress-current {
-		font-size: 0.85rem;
-		color: var(--color-text-muted);
-	}
-
-	.progress-stats {
-		display: flex;
-		gap: 0.75rem;
-		font-size: 0.8rem;
-	}
-
-	.stat-generated {
-		color: var(--grove-accent);
-	}
-
-	.stat-skipped {
-		color: var(--color-text-muted);
-	}
-
-	.stat-failed {
-		color: hsl(var(--destructive));
-	}
-
-	.stat-cost {
-		color: var(--color-primary);
-		font-weight: 500;
-	}
-
-	.generate-result-content {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.failed-details {
-		font-size: 0.8rem;
-		opacity: 0.9;
-	}
-
-	.failed-details summary {
-		cursor: pointer;
-		color: var(--color-text-muted);
-	}
-
-	.failed-list {
-		margin: 0.5rem 0 0 0;
-		padding-left: 1.25rem;
-		list-style: disc;
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-
-	.failed-list li {
-		word-break: break-word;
-	}
-
 	@media (max-width: 640px) {
 		.voice-grid {
 			grid-template-columns: 1fr;
@@ -1148,14 +1031,6 @@
 
 		.title-row {
 			flex-wrap: wrap;
-		}
-
-		.backfill-fields {
-			grid-template-columns: 1fr;
-		}
-
-		.generate-fields {
-			grid-template-columns: 1fr;
 		}
 	}
 </style>

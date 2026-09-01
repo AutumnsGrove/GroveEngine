@@ -378,21 +378,21 @@ So this is a small, late invitation, from someone whose job is to protect quiet 
 UPDATE posts SET gutter_content = '[
   {"type": "comment", "anchor": "paragraph:2", "content": "We used to have a French press. We don''t anymore — turns out ''fast tea'' was a contradiction we were forcing."},
   {"type": "comment", "anchor": "paragraph:5", "content": "Three kettles means three different whistles. Regulars can tell which tea''s coming just by the pitch."},
-  {"type": "comment", "anchor": "paragraph:10", "content": "Elena''s exact words, verbatim, the first time someone asked for ''the quick version.''"}
+  {"type": "comment", "anchor": "paragraph:9", "content": "Elena''s exact words, verbatim, the first time someone asked for ''the quick version.''"}
 ]' WHERE id = 'example-post-brewing';
 
 UPDATE posts SET gutter_content = '[
-  {"type": "comment", "anchor": "paragraph:2", "content": "Sarah''s chamomile is always waiting by the time her shoes hit the doorway sensor."},
+  {"type": "comment", "anchor": "paragraph:3", "content": "Sarah''s chamomile is always waiting by the time her shoes hit the doorway sensor."},
   {"type": "comment", "anchor": "paragraph:5", "content": "We did once catch a glimpse of the cover page. All it said was ''Draft 14.''"},
-  {"type": "comment", "anchor": "paragraph:9", "content": "He left his card once, ''in case anyone ever wants to borrow the telescope.'' Nobody has yet. We think that''s the point."},
+  {"type": "comment", "anchor": "paragraph:8", "content": "He left his card once, ''in case anyone ever wants to borrow the telescope.'' Nobody has yet. We think that''s the point."},
   {"type": "comment", "anchor": "paragraph:12", "content": "This is the paragraph we rewrite every time we update the site — it never quite captures it, but we keep trying."}
 ]' WHERE id = 'example-post-regulars';
 
 UPDATE posts SET gutter_content = '[
   {"type": "comment", "anchor": "paragraph:3", "content": "The playlist question comes up so often we considered a sign. We didn''t, on principle."},
-  {"type": "comment", "anchor": "paragraph:7", "content": "Try it for one visit. You''ll start hearing the kettle differently."},
-  {"type": "comment", "anchor": "paragraph:10", "content": "The earplug basket has needed refilling exactly twice in three years."},
-  {"type": "comment", "anchor": "paragraph:14", "content": "This is Elena''s favorite hour to work the counter, even though she''ll deny having a favorite."}
+  {"type": "comment", "anchor": "paragraph:6", "content": "Try it for one visit. You''ll start hearing the kettle differently."},
+  {"type": "comment", "anchor": "paragraph:11", "content": "The earplug basket has needed refilling exactly twice in three years."},
+  {"type": "comment", "anchor": "paragraph:13", "content": "This is Elena''s favorite hour to work the counter, even though she''ll deny having a favorite."}
 ]' WHERE id = 'example-post-music';
 
 UPDATE posts SET gutter_content = '[

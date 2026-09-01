@@ -17,6 +17,7 @@
 
 	let {
 		inGreenhouse,
+		isBeta = false,
 		enrolledAt,
 		notes,
 		footer,
@@ -58,6 +59,8 @@
 				<h3 class="text-lg font-semibold" style="color: var(--color-text)">
 					{#if inGreenhouse}
 						Greenhouse Member
+					{:else if isBeta}
+						Beta Access
 					{:else}
 						Standard Access
 					{/if}
@@ -67,6 +70,9 @@
 					{#if inGreenhouse}
 						You're part of Grove's greenhouse program! You'll get early access to experimental
 						features before they're released to everyone.
+					{:else if isBeta}
+						You're on Grove's beta branch. New changes land here first, before they reach the
+						stable release everyone else uses.
 					{:else}
 						You're using the stable release of Grove. Features are thoroughly tested before reaching
 						you.

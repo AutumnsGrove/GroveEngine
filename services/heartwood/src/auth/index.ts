@@ -23,6 +23,87 @@ import { schema } from "../db/auth.schema.js";
 import { getRequestContext, bridgeSessionToSessionDO } from "../lib/sessionBridge.js";
 
 /**
+ * Paths where Better Auth's twoFactor plugin creates a real session first,
+ * then immediately deletes it and issues a 2FA-pending cookie if the user
+ * has 2FA enabled (better-auth's own after-hook, matched on these same three
+ * paths). Bridging a session created on one of these paths would hand out a
+ * live grove_session before the TOTP/OTP/backup code is checked — a 2FA
+ * bypass. A fresh session (and bridge) fires again once the user completes
+ * verification via /two-factor/verify-*, which creates a brand new session.
+ */
+export function isPendingTwoFactorSignInPath(pathname: string): boolean {
+	return (
+		pathname.endsWith("/sign-in/email") ||
+		pathname.endsWith("/sign-in/username") ||
+		pathname.endsWith("/sign-in/phone-number")
+	);
+}
+
+interface RateLimitEntry {
+	key: string;
+	count: number;
+	lastRequest: number;
+}
+
+/**
+ * Read a Better Auth rate-limit counter from D1.
+ *
+ * On a storage failure this returns null, which Better Auth's rate limiter
+ * treats as "no prior record" and allows the request — the same fail-open
+ * behavior as before. That tradeoff is intentional (a D1 hiccup shouldn't
+ * lock every user out of sign-in), but it used to be silent. Failures are
+ * now logged so an outage in rate-limit storage is observable instead of
+ * invisibly disabling brute-force protection.
+ */
+export async function readBetterAuthRateLimitEntry(
+	env: Env,
+	key: string,
+): Promise<RateLimitEntry | null> {
+	try {
+		const row = await env.DB.prepare("SELECT count, window_start FROM rate_limits WHERE key = ?")
+			.bind(key)
+			.first<{ count: number; window_start: string }>();
+		if (!row) return null;
+		return {
+			key,
+			count: row.count,
+			lastRequest: new Date(row.window_start).getTime(),
+		};
+	} catch (error) {
+		console.error(`[BetterAuth] Rate limit storage read failed for key ${key}:`, error);
+		return null;
+	}
+}
+
+/**
+ * Persist a Better Auth rate-limit counter to D1. See
+ * readBetterAuthRateLimitEntry for the fail-open rationale.
+ */
+export async function writeBetterAuthRateLimitEntry(
+	env: Env,
+	key: string,
+	value: { count: number; lastRequest: number },
+): Promise<void> {
+	try {
+		await env.DB.prepare(
+			`INSERT INTO rate_limits (key, count, window_start)
+                 VALUES (?, ?, ?)
+                 ON CONFLICT(key) DO UPDATE SET count = ?, window_start = ?`,
+		)
+			.bind(
+				key,
+				value.count,
+				new Date(value.lastRequest).toISOString(),
+				value.count,
+				new Date(value.lastRequest).toISOString(),
+			)
+			.run();
+	} catch (error) {
+		console.error(`[BetterAuth] Rate limit storage write failed for key ${key}:`, error);
+	}
+}
+
+/**
  * Create a Better Auth instance configured for Cloudflare
  *
  * @param env - Cloudflare Worker environment bindings
@@ -83,42 +164,9 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 					"/callback/*": { window: 60, max: 30 },
 				},
 				customStorage: {
-					get: async (key: string) => {
-						try {
-							const row = await env.DB.prepare(
-								"SELECT count, window_start FROM rate_limits WHERE key = ?",
-							)
-								.bind(`ba:${key}`)
-								.first<{ count: number; window_start: string }>();
-							if (!row) return null;
-							return {
-								key: `ba:${key}`,
-								count: row.count,
-								lastRequest: new Date(row.window_start).getTime(),
-							};
-						} catch {
-							return null;
-						}
-					},
-					set: async (key: string, value: { count: number; lastRequest: number }) => {
-						try {
-							await env.DB.prepare(
-								`INSERT INTO rate_limits (key, count, window_start)
-                   VALUES (?, ?, ?)
-                   ON CONFLICT(key) DO UPDATE SET count = ?, window_start = ?`,
-							)
-								.bind(
-									`ba:${key}`,
-									value.count,
-									new Date(value.lastRequest).toISOString(),
-									value.count,
-									new Date(value.lastRequest).toISOString(),
-								)
-								.run();
-						} catch {
-							// Rate limit storage failure shouldn't block auth requests
-						}
-					},
+					get: async (key: string) => readBetterAuthRateLimitEntry(env, `ba:${key}`),
+					set: async (key: string, value: { count: number; lastRequest: number }) =>
+						writeBetterAuthRateLimitEntry(env, `ba:${key}`, value),
 				},
 			},
 		} as any,
@@ -164,17 +212,11 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 				sameSite: "lax",
 				path: "/",
 			},
-			cookies: {
-				oauth_state: {
-					name: "better-auth.oauth_state",
-					attributes: {
-						sameSite: isLocalDev ? "lax" : "none",
-						secure: !isLocalDev,
-						httpOnly: true,
-						path: "/",
-					},
-				},
-			},
+			// oauth_state previously overrode sameSite to "none" in production.
+			// That buys nothing — the Google -> /api/auth/callback/google return
+			// trip is a top-level GET navigation, which SameSite=Lax already
+			// permits — and it exposes the CSRF-defense cookie to cross-site
+			// sub-resource requests and POSTs. Let it inherit the Lax default.
 		},
 
 		user: {
@@ -264,7 +306,23 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 							return;
 						}
 
-						await bridgeSessionToSessionDO(
+						// See isPendingTwoFactorSignInPath: skip bridging the transient
+						// session BA creates before checking 2FA — bridging it would
+						// hand out a live grove_session before the code is verified.
+						const pathname = new URL(request.url).pathname;
+						if (isPendingTwoFactorSignInPath(pathname)) {
+							const userRow = await reqContext.env.DB.prepare(
+								"SELECT two_factor_enabled FROM ba_user WHERE id = ?",
+							)
+								.bind(session.userId as string)
+								.first<{ two_factor_enabled: number }>();
+							if (userRow?.two_factor_enabled) {
+								console.log("[SessionBridge] Skipping bridge for pre-2FA-verification session");
+								return;
+							}
+						}
+
+						const result = await bridgeSessionToSessionDO(
 							request,
 							{
 								id: session.id as string,
@@ -275,6 +333,17 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 							},
 							reqContext.env,
 						);
+
+						// Surface bridge failures loudly — a silent failure here leaves
+						// the user with a valid Better Auth session but no grove_session,
+						// which breaks every grove_session-only endpoint (admin routes,
+						// device authorization) with no diagnostic trail.
+						if (result.error) {
+							logGroveError("Heartwood", HW_SVC_ERRORS.SESSION_BRIDGE_FAILED, {
+								userId: session.userId as string,
+								detail: result.error,
+							});
+						}
 					},
 				},
 			},

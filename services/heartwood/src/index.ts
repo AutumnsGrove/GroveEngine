@@ -21,7 +21,6 @@ import session from "./routes/session.js";
 import cdn from "./routes/cdn.js";
 import betterAuth from "./routes/betterAuth.js";
 import settings from "./routes/settings.js";
-import status from "./routes/status.js";
 import device from "./routes/device.js";
 import user from "./routes/user.js";
 
@@ -81,7 +80,6 @@ app.route("/admin", admin);
 app.route("/session", session);
 app.route("/cdn", cdn);
 app.route("/settings", settings);
-app.route("/status", status);
 app.route("/user", user);
 
 // Better Auth routes (new auth system)
@@ -149,17 +147,6 @@ app.get("/", (c) => {
 				files: "GET /cdn/files",
 				folders: "GET /cdn/folders",
 				delete: "DELETE /cdn/files/:id",
-			},
-			status: {
-				incidents: "GET /status/incidents",
-				createIncident: "POST /status/incidents",
-				incidentDetail: "GET /status/incidents/:id",
-				addUpdate: "POST /status/incidents/:id/updates",
-				updateIncident: "PATCH /status/incidents/:id",
-				components: "GET /status/components",
-				updateComponent: "PATCH /status/components/:slug",
-				scheduled: "GET /status/scheduled",
-				createScheduled: "POST /status/scheduled",
 			},
 		},
 	});

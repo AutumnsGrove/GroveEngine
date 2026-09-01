@@ -38,26 +38,6 @@
 			</GlassCard>
 		</a>
 
-		<!-- Trail -->
-		<a href="/arbor/timeline" class="feature-link">
-			<GlassCard variant="frosted" hoverable flush>
-				<div class="feature-body">
-					<div class="feature-icon">
-						<metricIcons.calendar class="icon" />
-					</div>
-					<div class="feature-content">
-						<div class="feature-title">
-							<GroveTerm interactive term="trails">Trail</GroveTerm>
-							<Waystone slug="what-are-trails" label="Learn about Trail" />
-						</div>
-						<p class="feature-description">
-							Track your creative journey with automated activity summaries.
-						</p>
-					</div>
-				</div>
-			</GlassCard>
-		</a>
-
 		<!-- Reeds (Comments) -->
 		<a href="/arbor/reeds" class="feature-link">
 			<GlassCard variant="frosted" hoverable flush>

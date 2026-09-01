@@ -24,6 +24,9 @@ export interface GreenhouseStatusCardProps extends BaseGraftProps {
 	/** Whether the tenant is currently in the greenhouse program */
 	inGreenhouse: boolean;
 
+	/** Whether this request is being served from the beta deployment (`<tenant>-beta.grove.place`) */
+	isBeta?: boolean;
+
 	/** When the tenant was enrolled (if applicable) */
 	enrolledAt?: Date;
 

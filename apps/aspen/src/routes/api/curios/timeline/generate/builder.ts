@@ -139,7 +139,8 @@ export async function generateSummary(
 		options: {
 			model: config.openrouter_model,
 			tenantApiKey: undefined, // Set by caller
-			maxTokens: 2048,
+			// See same fix + rationale in workers/timeline-sync/src/generator.ts.
+			maxTokens: 8192,
 			temperature: 0.7,
 			skipQuota: true,
 		},

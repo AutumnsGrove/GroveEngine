@@ -108,7 +108,14 @@ export async function getClientByDomain(
 	return db.prepare(`SELECT * FROM clients WHERE domain = ?`).bind(domain).first<Client>();
 }
 
-export async function getAllClients(db: D1DatabaseOrSession): Promise<Client[]> {
-	const result = await db.prepare(`SELECT * FROM clients ORDER BY name`).all<Client>();
+export async function getAllClients(
+	db: D1DatabaseOrSession,
+	limit: number = 50,
+	offset: number = 0,
+): Promise<Client[]> {
+	const result = await db
+		.prepare(`SELECT * FROM clients ORDER BY name LIMIT ? OFFSET ?`)
+		.bind(limit, offset)
+		.all<Client>();
 	return result.results || [];
 }

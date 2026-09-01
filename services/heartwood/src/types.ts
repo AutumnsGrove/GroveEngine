@@ -166,7 +166,14 @@ export type AuditEventType =
 	| "device_code_created"
 	| "device_code_authorized"
 	| "device_code_denied"
-	| "device_code_polled";
+	| "device_code_polled"
+	| "refresh_token_reuse_detected"
+	| "cdn_file_uploaded"
+	| "cdn_file_deleted"
+	| "cdn_files_migrated"
+	| "user_avatar_updated"
+	| "user_avatar_removed"
+	| "user_preferences_updated";
 
 // API Request/Response Types
 export interface TokenRequest {
@@ -201,11 +208,13 @@ export interface DeviceCodeResponse {
 	interval: number;
 }
 
+// email/name are deliberately absent — GET /verify never sends them (clients
+// should use /userinfo). The type used to declare them anyway, which gave a
+// future edit type-system permission to leak PII from an endpoint that
+// requires no caller authentication.
 export interface TokenInfo {
 	active: boolean;
 	sub?: string;
-	email?: string;
-	name?: string;
 	exp?: number;
 	iat?: number;
 	client_id?: string;
@@ -243,6 +252,13 @@ export interface GoogleUserInfo {
 export interface JWTPayload {
 	sub: string;
 	client_id: string;
+	// Audience — mirrors client_id today (one token, one client). Present so
+	// resource servers CAN enforce audience restriction; verifyAccessToken
+	// doesn't currently pass an `audience` option to jose, so this is
+	// additive and doesn't change verification behavior for existing callers.
+	// Optional because tokens issued before this claim existed, and mocked
+	// payloads elsewhere in the test suite, may not carry it.
+	aud?: string;
 	iss: string;
 	iat: number;
 	exp: number;
@@ -271,6 +287,11 @@ export interface AuthError {
 // =============================================================================
 
 export type SubscriptionTier = "seedling" | "sapling" | "oak" | "evergreen";
+
+// Single source of truth for tier ordering — used for both request
+// validation and upgrade/downgrade comparison, so a new tier only needs to
+// be added here rather than in every place that previously duplicated it.
+export const SUBSCRIPTION_TIERS: SubscriptionTier[] = ["seedling", "sapling", "oak", "evergreen"];
 
 export interface UserSubscription {
 	id: string;
@@ -306,6 +327,7 @@ export type SubscriptionAuditEventType =
 	| "grace_period_started"
 	| "grace_period_ended"
 	| "post_limit_reached"
+	| "post_count_updated"
 	| "post_archived"
 	| "custom_domain_added"
 	| "custom_domain_verified"

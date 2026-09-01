@@ -16,10 +16,7 @@ vi.mock("../db/queries.js", () => ({
 	getAllClients: vi.fn(),
 	checkRateLimit: vi.fn(),
 	// cookieAuth dependencies
-	verifyAccessToken: vi.fn(),
 	isUserAdmin: vi.fn(),
-	getUserById: vi.fn(),
-	isEmailAdmin: vi.fn(),
 }));
 
 // Mock db session
@@ -51,20 +48,22 @@ vi.mock("../middleware/rateLimit.js", async (importOriginal) => {
 	};
 });
 
-// Mock JWT verification
+// Mock JWT verification (a dependency of the REAL adminCookieAuth below —
+// unlike the previous version of this file, adminCookieAuth itself is not
+// mocked, so these tests exercise the actual auth-gating logic).
 vi.mock("../services/jwt.js", () => ({
 	verifyAccessToken: vi.fn(),
 }));
 
-// Mock cookie auth middleware
-vi.mock("../middleware/cookieAuth.js", () => ({
-	adminCookieAuth: vi
-		.fn()
-		.mockReturnValue(async (_c: unknown, next: () => Promise<void>) => next()),
-}));
-
 import adminRoutes from "./admin.js";
-import { getAdminStats, getAllUsers, getAuditLogs, getAllClients } from "../db/queries.js";
+import {
+	getAdminStats,
+	getAllUsers,
+	getAuditLogs,
+	getAllClients,
+	isUserAdmin,
+} from "../db/queries.js";
+import { verifyAccessToken } from "../services/jwt.js";
 
 // Create test app
 function createApp() {
@@ -75,8 +74,103 @@ function createApp() {
 
 const mockEnv = createMockEnv();
 
+const ADMIN_TOKEN_PAYLOAD = {
+	sub: "admin-user-1",
+	client_id: "test",
+	iss: "https://auth.grove.place",
+	iat: 1000000000,
+	exp: 1000003600,
+};
+
+function adminHeaders() {
+	return { Authorization: "Bearer valid-admin-token" };
+}
+
 beforeEach(() => {
 	vi.clearAllMocks();
+	// Default: authenticated as a verified admin, via the Bearer path —
+	// individual tests override this to exercise the other outcomes.
+	vi.mocked(verifyAccessToken).mockResolvedValue(ADMIN_TOKEN_PAYLOAD);
+	vi.mocked(isUserAdmin).mockResolvedValue(true);
+});
+
+// =============================================================================
+// Admin auth gate (previously entirely mocked away — no test asserted a
+// non-admin or anonymous caller was actually rejected by this router)
+// =============================================================================
+
+describe("admin auth gate", () => {
+	it("returns 401 with no Authorization header and no cookies", async () => {
+		const app = createApp();
+		const res = await app.request("/admin/users", { method: "GET" }, mockEnv);
+
+		expect(res.status).toBe(401);
+		const json: any = (await res.json()) as any;
+		expect(json.error).toBe("unauthorized");
+		expect(getAllUsers).not.toHaveBeenCalled();
+	});
+
+	it("returns 401 for an invalid/expired Bearer token", async () => {
+		vi.mocked(verifyAccessToken).mockResolvedValue(null);
+
+		const app = createApp();
+		const res = await app.request(
+			"/admin/users",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(401);
+		const json: any = (await res.json()) as any;
+		expect(json.error).toBe("invalid_token");
+	});
+
+	it("returns 403 for a valid token belonging to a non-admin user", async () => {
+		vi.mocked(isUserAdmin).mockResolvedValue(false);
+
+		const app = createApp();
+		const res = await app.request(
+			"/admin/users",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(403);
+		const json: any = (await res.json()) as any;
+		expect(json.error).toBe("forbidden");
+		expect(getAllUsers).not.toHaveBeenCalled();
+	});
+
+	it("allows a verified admin through", async () => {
+		vi.mocked(getAllUsers).mockResolvedValue([]);
+
+		const app = createApp();
+		const res = await app.request(
+			"/admin/users",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(200);
+		expect(isUserAdmin).toHaveBeenCalledWith(expect.anything(), ADMIN_TOKEN_PAYLOAD.sub);
+	});
+
+	it("gates a route registered after the middleware just as strictly (catch-all applies to the whole router)", async () => {
+		vi.mocked(isUserAdmin).mockResolvedValue(false);
+
+		const app = createApp();
+		// /admin/clients is registered last in admin.ts — if the catch-all
+		// middleware were somehow route-order-sensitive, this is the route
+		// that would slip through first.
+		const res = await app.request(
+			"/admin/clients",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(403);
+		expect(getAllClients).not.toHaveBeenCalled();
+	});
 });
 
 // =============================================================================
@@ -96,7 +190,11 @@ describe("GET /admin/stats", () => {
 		vi.mocked(getAdminStats).mockResolvedValue(mockStats);
 
 		const app = createApp();
-		const res = await app.request("/admin/stats", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/admin/stats",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
 
 		expect(res.status).toBe(200);
 		const json: any = (await res.json()) as any;
@@ -116,7 +214,11 @@ describe("GET /admin/stats", () => {
 		});
 
 		const app = createApp();
-		const res = await app.request("/admin/stats", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/admin/stats",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
 
 		expect(res.status).toBe(200);
 		const json: any = (await res.json()) as any;
@@ -124,14 +226,19 @@ describe("GET /admin/stats", () => {
 		expect(json.replication).toHaveProperty("served_by_primary");
 	});
 
-	it("handles DB error in stats gracefully", async () => {
+	it("returns a structured 500 (not a bare unhandled error) when the stats query fails", async () => {
 		vi.mocked(getAdminStats).mockRejectedValue(new Error("DB connection failed"));
 
 		const app = createApp();
-		const res = await app.request("/admin/stats", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/admin/stats",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
 
-		// Hono's default error handler returns 500
 		expect(res.status).toBe(500);
+		const json: any = (await res.json()) as any;
+		expect(json.error).toBe("stats_failed");
 	});
 });
 
@@ -148,7 +255,11 @@ describe("GET /admin/users", () => {
 		vi.mocked(getAllUsers).mockResolvedValue(mockUsers as any);
 
 		const app = createApp();
-		const res = await app.request("/admin/users", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/admin/users",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
 
 		expect(res.status).toBe(200);
 		const json: any = (await res.json()) as any;
@@ -157,11 +268,51 @@ describe("GET /admin/users", () => {
 		expect(json.pagination.offset).toBe(0);
 	});
 
+	it("strips fields not on the explicit allowlist, even ones that don't exist yet", async () => {
+		// Regression test: the route used to return `SELECT *` verbatim.
+		// This asserts a hypothetical future-sensitive column (a TOTP
+		// secret, here) does NOT reach the client just because it exists on
+		// the row the query layer returned.
+		vi.mocked(getAllUsers).mockResolvedValue([
+			{
+				id: "u1",
+				email: "a@grove.place",
+				name: "Alice",
+				avatar_url: null,
+				provider: "google",
+				provider_id: "google-id-123",
+				is_admin: 0,
+				created_at: "2025-01-01",
+				last_login: null,
+				theme: null,
+				grove_mode: null,
+				season: null,
+				totp_secret: "should-never-leave-the-server",
+			},
+		] as any);
+
+		const app = createApp();
+		const res = await app.request(
+			"/admin/users",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
+
+		const json: any = (await res.json()) as any;
+		expect(json.users[0].totp_secret).toBeUndefined();
+		expect(json.users[0].provider_id).toBeUndefined();
+		expect(json.users[0].email).toBe("a@grove.place");
+	});
+
 	it("respects limit and offset query params", async () => {
 		vi.mocked(getAllUsers).mockResolvedValue([]);
 
 		const app = createApp();
-		const res = await app.request("/admin/users?limit=10&offset=20", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/admin/users?limit=10&offset=20",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
 
 		expect(res.status).toBe(200);
 		const json: any = (await res.json()) as any;
@@ -174,7 +325,11 @@ describe("GET /admin/users", () => {
 		vi.mocked(getAllUsers).mockResolvedValue([]);
 
 		const app = createApp();
-		const res = await app.request("/admin/users?limit=500", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/admin/users?limit=500",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
 
 		expect(res.status).toBe(200);
 		const json: any = (await res.json()) as any;
@@ -185,7 +340,11 @@ describe("GET /admin/users", () => {
 		vi.mocked(getAllUsers).mockResolvedValue([]);
 
 		const app = createApp();
-		const res = await app.request("/admin/users?limit=-5", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/admin/users?limit=-5",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
 
 		expect(res.status).toBe(200);
 		const json: any = (await res.json()) as any;
@@ -196,7 +355,46 @@ describe("GET /admin/users", () => {
 		vi.mocked(getAllUsers).mockResolvedValue([]);
 
 		const app = createApp();
-		const res = await app.request("/admin/users?offset=-10", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/admin/users?offset=-10",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(200);
+		const json: any = (await res.json()) as any;
+		expect(json.pagination.offset).toBe(0);
+	});
+
+	it("falls back to the default limit for a non-numeric limit, instead of letting NaN reach the query unbounded", async () => {
+		// Regression test: parseInt("abc") -> NaN, and Math.max/min propagate
+		// NaN rather than clamping it — the previous bounds check silently
+		// let a non-numeric limit through, and D1/SQLite treats a NaN-bound
+		// LIMIT as unbounded, dumping the entire users table.
+		vi.mocked(getAllUsers).mockResolvedValue([]);
+
+		const app = createApp();
+		const res = await app.request(
+			"/admin/users?limit=abc",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(200);
+		const json: any = (await res.json()) as any;
+		expect(json.pagination.limit).toBe(50);
+		expect(vi.mocked(getAllUsers)).toHaveBeenCalledWith(expect.anything(), 50, 0);
+	});
+
+	it("falls back to offset 0 for a non-numeric offset", async () => {
+		vi.mocked(getAllUsers).mockResolvedValue([]);
+
+		const app = createApp();
+		const res = await app.request(
+			"/admin/users?offset=xyz",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
 
 		expect(res.status).toBe(200);
 		const json: any = (await res.json()) as any;
@@ -214,7 +412,11 @@ describe("GET /admin/audit-log", () => {
 		vi.mocked(getAuditLogs).mockResolvedValue(mockLogs as any);
 
 		const app = createApp();
-		const res = await app.request("/admin/audit-log", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/admin/audit-log",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
 
 		expect(res.status).toBe(200);
 		const json: any = (await res.json()) as any;
@@ -227,7 +429,11 @@ describe("GET /admin/audit-log", () => {
 		vi.mocked(getAuditLogs).mockResolvedValue([]);
 
 		const app = createApp();
-		await app.request("/admin/audit-log?event_type=login", { method: "GET" }, mockEnv);
+		await app.request(
+			"/admin/audit-log?event_type=login",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
 
 		expect(vi.mocked(getAuditLogs)).toHaveBeenCalledWith(
 			expect.anything(),
@@ -241,7 +447,7 @@ describe("GET /admin/audit-log", () => {
 		const app = createApp();
 		const res = await app.request(
 			"/admin/audit-log?limit=25&offset=50",
-			{ method: "GET" },
+			{ method: "GET", headers: adminHeaders() },
 			mockEnv,
 		);
 
@@ -255,10 +461,29 @@ describe("GET /admin/audit-log", () => {
 		vi.mocked(getAuditLogs).mockResolvedValue([]);
 
 		const app = createApp();
-		const res = await app.request("/admin/audit-log?limit=999", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/admin/audit-log?limit=999",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
 
 		const json: any = (await res.json()) as any;
 		expect(json.pagination.limit).toBe(100);
+	});
+
+	it("falls back to the default limit for a non-numeric limit", async () => {
+		vi.mocked(getAuditLogs).mockResolvedValue([]);
+
+		const app = createApp();
+		const res = await app.request(
+			"/admin/audit-log?limit=not-a-number",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(200);
+		const json: any = (await res.json()) as any;
+		expect(json.pagination.limit).toBe(50);
 	});
 });
 
@@ -285,7 +510,11 @@ describe("GET /admin/clients", () => {
 		vi.mocked(getAllClients).mockResolvedValue(mockClients as any);
 
 		const app = createApp();
-		const res = await app.request("/admin/clients", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/admin/clients",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
 
 		expect(res.status).toBe(200);
 		const json: any = (await res.json()) as any;
@@ -310,7 +539,11 @@ describe("GET /admin/clients", () => {
 		vi.mocked(getAllClients).mockResolvedValue([]);
 
 		const app = createApp();
-		const res = await app.request("/admin/clients", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/admin/clients",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
 
 		expect(res.status).toBe(200);
 		const json: any = (await res.json()) as any;
@@ -334,10 +567,30 @@ describe("GET /admin/clients", () => {
 		] as any);
 
 		const app = createApp();
-		const res = await app.request("/admin/clients", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/admin/clients",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
 
 		const json: any = (await res.json()) as any;
 		expect(json.clients[0].redirect_uris).toBeInstanceOf(Array);
 		expect(json.clients[0].redirect_uris).toHaveLength(2);
+	});
+
+	it("is paginated like the other list endpoints", async () => {
+		vi.mocked(getAllClients).mockResolvedValue([]);
+
+		const app = createApp();
+		const res = await app.request(
+			"/admin/clients?limit=5&offset=10",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(200);
+		const json: any = (await res.json()) as any;
+		expect(json.pagination).toEqual({ limit: 5, offset: 10 });
+		expect(vi.mocked(getAllClients)).toHaveBeenCalledWith(expect.anything(), 5, 10);
 	});
 });

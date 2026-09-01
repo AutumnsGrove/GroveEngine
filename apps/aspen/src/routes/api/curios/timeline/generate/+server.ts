@@ -186,6 +186,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			config.repos_exclude ? JSON.parse(config.repos_exclude) : null,
 			curioDb,
 			tenantId,
+			config.timezone,
 		);
 
 		if (commits.length === 0) {

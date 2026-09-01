@@ -52,15 +52,10 @@ vi.mock("../middleware/rateLimit.js", async (importOriginal) => {
 	};
 });
 
-// Mock bearer auth
+// Mock bearer auth (used by the GET/read routes only)
 vi.mock("../middleware/bearerAuth.js", () => ({
 	verifyBearerAuth: vi.fn(),
 	extractBearerToken: vi.fn(),
-}));
-
-// Mock security utils
-vi.mock("../middleware/security.js", () => ({
-	getClientIP: vi.fn().mockReturnValue("127.0.0.1"),
 }));
 
 import subscriptionRoutes from "./subscription.js";
@@ -79,15 +74,16 @@ import { checkRouteRateLimit } from "../middleware/rateLimit.js";
 
 // Test data
 const TEST_USER_ID = "user-123";
+const SERVICE_SECRET = "test-service-secret-value";
 
 const mockSubscription: UserSubscription = {
 	id: "sub-1",
 	user_id: TEST_USER_ID,
 	tier: "sapling",
-	post_limit: 2000,
+	post_limit: null, // TIER_POST_LIMITS.sapling is null (unlimited) — fixture must match
 	post_count: 150,
 	grace_period_start: null,
-	grace_period_days: 0,
+	grace_period_days: 14,
 	stripe_customer_id: null,
 	stripe_subscription_id: null,
 	billing_period_start: null,
@@ -101,9 +97,9 @@ const mockSubscription: UserSubscription = {
 const mockStatus: SubscriptionStatus = {
 	tier: "sapling",
 	post_count: 150,
-	post_limit: 2000,
-	posts_remaining: 1850,
-	percentage_used: 7.5,
+	post_limit: null,
+	posts_remaining: null,
+	percentage_used: null,
 	is_at_limit: false,
 	is_in_grace_period: false,
 	grace_period_days_remaining: null,
@@ -118,11 +114,20 @@ function createApp() {
 	return app;
 }
 
-const mockEnv = createMockEnv();
+let mockEnv: Env;
 
 beforeEach(() => {
 	vi.clearAllMocks();
+	mockEnv = createMockEnv();
 });
+
+function serviceHeaders(extra: Record<string, string> = {}) {
+	return {
+		"Content-Type": "application/json",
+		Authorization: `Bearer ${SERVICE_SECRET}`,
+		...extra,
+	};
+}
 
 // =============================================================================
 // GET /subscription - Get current user's subscription
@@ -153,6 +158,15 @@ describe("GET /subscription", () => {
 		expect(json.error_description).toContain("Missing or invalid token");
 	});
 
+	it("checks authentication before rate limiting", async () => {
+		(verifyBearerAuth as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+
+		const app = createApp();
+		await app.request("/subscription", { method: "GET" }, mockEnv);
+
+		expect(checkRouteRateLimit).not.toHaveBeenCalled();
+	});
+
 	it("returns 429 when rate limited", async () => {
 		(checkRouteRateLimit as ReturnType<typeof vi.fn>).mockResolvedValue({
 			allowed: false,
@@ -167,6 +181,19 @@ describe("GET /subscription", () => {
 		const json = (await res.json()) as ErrorResponse;
 		expect(json.error).toBe("rate_limit");
 		expect(json.retry_after).toBe(30);
+	});
+
+	it("keys the rate limit on the authenticated user's ID, not IP", async () => {
+		const app = createApp();
+		await app.request("/subscription", { method: "GET" }, mockEnv);
+
+		expect(checkRouteRateLimit).toHaveBeenCalledWith(
+			expect.anything(),
+			"subscription_read",
+			TEST_USER_ID,
+			expect.any(Number),
+			expect.any(Number),
+		);
 	});
 
 	it("returns current user's subscription and status", async () => {
@@ -341,25 +368,22 @@ describe("GET /subscription/:userId/can-post", () => {
 
 // =============================================================================
 // POST /subscription/:userId/post-count - Update post count
+// Internal-service-only: gated on SERVICE_SECRET, not a user's own token.
 // =============================================================================
 
 describe("POST /subscription/:userId/post-count", () => {
 	const updatedSub = { ...mockSubscription, post_count: 151 };
 
 	beforeEach(() => {
+		mockEnv.SERVICE_SECRET = SERVICE_SECRET;
 		(checkRouteRateLimit as ReturnType<typeof vi.fn>).mockResolvedValue({
 			allowed: true,
 			remaining: 10,
 		});
-		(verifyBearerAuth as ReturnType<typeof vi.fn>).mockResolvedValue({
-			sub: TEST_USER_ID,
-		});
 		(getSubscriptionStatus as ReturnType<typeof vi.fn>).mockReturnValue(mockStatus);
 	});
 
-	it("returns 401 when no Bearer token", async () => {
-		(verifyBearerAuth as ReturnType<typeof vi.fn>).mockResolvedValue(null);
-
+	it("rejects a request with no Authorization header at all", async () => {
 		const app = createApp();
 		const res = await app.request(
 			`/subscription/${TEST_USER_ID}/post-count`,
@@ -372,25 +396,48 @@ describe("POST /subscription/:userId/post-count", () => {
 		);
 
 		expect(res.status).toBe(401);
+		const json = (await res.json()) as ErrorResponse;
+		expect(json.error).toBe("unauthorized");
 	});
 
-	it("returns 403 when accessing another user's data", async () => {
-		const otherUserId = "other-user-456";
+	it("rejects a valid user Bearer token — this endpoint is not user-reachable", async () => {
+		// This is the direct regression test for the critical finding: a
+		// user's own access token must never be sufficient to mutate their
+		// own post count, since post_count is the paywall enforcement
+		// variable. Only SERVICE_SECRET grants access here.
+		const app = createApp();
+		const res = await app.request(
+			`/subscription/${TEST_USER_ID}/post-count`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: "Bearer some-users-own-valid-access-token",
+				},
+				body: JSON.stringify({ count: 0 }),
+			},
+			mockEnv,
+		);
+
+		expect(res.status).toBe(401);
+		expect(setPostCount).not.toHaveBeenCalled();
+	});
+
+	it("fails closed when SERVICE_SECRET is unset, even with a correctly-shaped Bearer header", async () => {
+		mockEnv.SERVICE_SECRET = undefined;
 
 		const app = createApp();
 		const res = await app.request(
-			`/subscription/${otherUserId}/post-count`,
+			`/subscription/${TEST_USER_ID}/post-count`,
 			{
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers: { "Content-Type": "application/json", Authorization: "Bearer " },
 				body: JSON.stringify({ action: "increment" }),
 			},
 			mockEnv,
 		);
 
-		expect(res.status).toBe(403);
-		const json = (await res.json()) as ErrorResponse;
-		expect(json.error).toBe("forbidden");
+		expect(res.status).toBe(401);
 	});
 
 	it("returns 429 when rate limited", async () => {
@@ -405,7 +452,7 @@ describe("POST /subscription/:userId/post-count", () => {
 			`/subscription/${TEST_USER_ID}/post-count`,
 			{
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers: serviceHeaders(),
 				body: JSON.stringify({ action: "increment" }),
 			},
 			mockEnv,
@@ -414,15 +461,32 @@ describe("POST /subscription/:userId/post-count", () => {
 		expect(res.status).toBe(429);
 	});
 
+	it("keys the rate limit on the target userId", async () => {
+		const app = createApp();
+		await app.request(
+			`/subscription/${TEST_USER_ID}/post-count`,
+			{
+				method: "POST",
+				headers: serviceHeaders(),
+				body: JSON.stringify({ action: "increment" }),
+			},
+			mockEnv,
+		);
+
+		expect(checkRouteRateLimit).toHaveBeenCalledWith(
+			expect.anything(),
+			"subscription_write",
+			TEST_USER_ID,
+			expect.any(Number),
+			expect.any(Number),
+		);
+	});
+
 	it("returns 400 for invalid JSON body", async () => {
 		const app = createApp();
 		const res = await app.request(
 			`/subscription/${TEST_USER_ID}/post-count`,
-			{
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: "not valid json",
-			},
+			{ method: "POST", headers: serviceHeaders(), body: "not valid json" },
 			mockEnv,
 		);
 
@@ -438,7 +502,7 @@ describe("POST /subscription/:userId/post-count", () => {
 			`/subscription/${TEST_USER_ID}/post-count`,
 			{
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers: serviceHeaders(),
 				body: JSON.stringify({ action: "invalid_action" }),
 			},
 			mockEnv,
@@ -447,9 +511,42 @@ describe("POST /subscription/:userId/post-count", () => {
 		expect(res.status).toBe(400);
 		const json = (await res.json()) as ErrorResponse;
 		expect(json.error).toBe("invalid_request");
-		expect(json.error_description).toContain(
-			'either { action: "increment" | "decrement" } or { count: number }',
+	});
+
+	it("rejects a non-integer count", async () => {
+		const app = createApp();
+		const res = await app.request(
+			`/subscription/${TEST_USER_ID}/post-count`,
+			{ method: "POST", headers: serviceHeaders(), body: JSON.stringify({ count: 1.5 }) },
+			mockEnv,
 		);
+
+		expect(res.status).toBe(400);
+		expect(setPostCount).not.toHaveBeenCalled();
+	});
+
+	it("rejects a negative count", async () => {
+		const app = createApp();
+		const res = await app.request(
+			`/subscription/${TEST_USER_ID}/post-count`,
+			{ method: "POST", headers: serviceHeaders(), body: JSON.stringify({ count: -5 }) },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(400);
+		expect(setPostCount).not.toHaveBeenCalled();
+	});
+
+	it("rejects an unreasonably large count", async () => {
+		const app = createApp();
+		const res = await app.request(
+			`/subscription/${TEST_USER_ID}/post-count`,
+			{ method: "POST", headers: serviceHeaders(), body: JSON.stringify({ count: 1e308 }) },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(400);
+		expect(setPostCount).not.toHaveBeenCalled();
 	});
 
 	it("increments post count", async () => {
@@ -460,7 +557,7 @@ describe("POST /subscription/:userId/post-count", () => {
 			`/subscription/${TEST_USER_ID}/post-count`,
 			{
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers: serviceHeaders(),
 				body: JSON.stringify({ action: "increment" }),
 			},
 			mockEnv,
@@ -484,7 +581,7 @@ describe("POST /subscription/:userId/post-count", () => {
 			`/subscription/${TEST_USER_ID}/post-count`,
 			{
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers: serviceHeaders(),
 				body: JSON.stringify({ action: "decrement" }),
 			},
 			mockEnv,
@@ -499,18 +596,14 @@ describe("POST /subscription/:userId/post-count", () => {
 		);
 	});
 
-	it("sets post count to specific number", async () => {
+	it("sets post count to a specific valid number", async () => {
 		const setCountSub = { ...mockSubscription, post_count: 500 };
 		(setPostCount as ReturnType<typeof vi.fn>).mockResolvedValue(setCountSub);
 
 		const app = createApp();
 		const res = await app.request(
 			`/subscription/${TEST_USER_ID}/post-count`,
-			{
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ count: 500 }),
-			},
+			{ method: "POST", headers: serviceHeaders(), body: JSON.stringify({ count: 500 }) },
 			mockEnv,
 		);
 
@@ -524,6 +617,22 @@ describe("POST /subscription/:userId/post-count", () => {
 		);
 	});
 
+	it("accepts count as zero (a legitimate internal-service correction, now gated behind SERVICE_SECRET)", async () => {
+		const zeroCountSub = { ...mockSubscription, post_count: 0 };
+		(setPostCount as ReturnType<typeof vi.fn>).mockResolvedValue(zeroCountSub);
+
+		const app = createApp();
+		const res = await app.request(
+			`/subscription/${TEST_USER_ID}/post-count`,
+			{ method: "POST", headers: serviceHeaders(), body: JSON.stringify({ count: 0 }) },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(200);
+		const json = (await res.json()) as SubscriptionResponse;
+		expect(json.subscription.post_count).toBe(0);
+	});
+
 	it("returns 404 when subscription not found after increment", async () => {
 		(incrementPostCount as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
@@ -532,7 +641,7 @@ describe("POST /subscription/:userId/post-count", () => {
 			`/subscription/${TEST_USER_ID}/post-count`,
 			{
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers: serviceHeaders(),
 				body: JSON.stringify({ action: "increment" }),
 			},
 			mockEnv,
@@ -543,16 +652,16 @@ describe("POST /subscription/:userId/post-count", () => {
 		expect(json.error).toBe("not_found");
 	});
 
-	it("returns 404 when subscription not found after set count", async () => {
-		(setPostCount as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+	it("returns 404 when subscription not found after decrement", async () => {
+		(decrementPostCount as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
 		const app = createApp();
 		const res = await app.request(
 			`/subscription/${TEST_USER_ID}/post-count`,
 			{
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ count: 100 }),
+				headers: serviceHeaders(),
+				body: JSON.stringify({ action: "decrement" }),
 			},
 			mockEnv,
 		);
@@ -560,47 +669,37 @@ describe("POST /subscription/:userId/post-count", () => {
 		expect(res.status).toBe(404);
 	});
 
-	it("accepts count as zero", async () => {
-		const zeroCountSub = { ...mockSubscription, post_count: 0 };
-		(setPostCount as ReturnType<typeof vi.fn>).mockResolvedValue(zeroCountSub);
+	it("returns 404 when subscription not found after set count", async () => {
+		(setPostCount as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
 		const app = createApp();
 		const res = await app.request(
 			`/subscription/${TEST_USER_ID}/post-count`,
-			{
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ count: 0 }),
-			},
+			{ method: "POST", headers: serviceHeaders(), body: JSON.stringify({ count: 100 }) },
 			mockEnv,
 		);
 
-		expect(res.status).toBe(200);
-		const json = (await res.json()) as SubscriptionResponse;
-		expect(json.subscription.post_count).toBe(0);
+		expect(res.status).toBe(404);
 	});
 });
 
 // =============================================================================
 // PUT /subscription/:userId/tier - Update subscription tier
+// Internal-service-only: gated on SERVICE_SECRET, not a user's own token.
 // =============================================================================
 
 describe("PUT /subscription/:userId/tier", () => {
 	beforeEach(() => {
+		mockEnv.SERVICE_SECRET = SERVICE_SECRET;
 		(checkRouteRateLimit as ReturnType<typeof vi.fn>).mockResolvedValue({
 			allowed: true,
 			remaining: 10,
-		});
-		(verifyBearerAuth as ReturnType<typeof vi.fn>).mockResolvedValue({
-			sub: TEST_USER_ID,
 		});
 		(getOrCreateUserSubscription as ReturnType<typeof vi.fn>).mockResolvedValue(mockSubscription);
 		(getSubscriptionStatus as ReturnType<typeof vi.fn>).mockReturnValue(mockStatus);
 	});
 
-	it("returns 401 when no Bearer token", async () => {
-		(verifyBearerAuth as ReturnType<typeof vi.fn>).mockResolvedValue(null);
-
+	it("rejects a request with no Authorization header at all", async () => {
 		const app = createApp();
 		const res = await app.request(
 			`/subscription/${TEST_USER_ID}/tier`,
@@ -615,23 +714,44 @@ describe("PUT /subscription/:userId/tier", () => {
 		expect(res.status).toBe(401);
 	});
 
-	it("returns 403 when accessing another user's data", async () => {
-		const otherUserId = "other-user-456";
-
+	it("rejects a valid user Bearer token — self-serve tier upgrade must not be possible", async () => {
+		// Direct regression test for the critical finding: a user granting
+		// themselves any tier (and therefore an unlimited post_limit, since
+		// every tier above seedling maps to null) with their own valid
+		// access token and no payment verification whatsoever.
 		const app = createApp();
 		const res = await app.request(
-			`/subscription/${otherUserId}/tier`,
+			`/subscription/${TEST_USER_ID}/tier`,
 			{
 				method: "PUT",
-				headers: { "Content-Type": "application/json" },
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: "Bearer some-users-own-valid-access-token",
+				},
 				body: JSON.stringify({ tier: "evergreen" }),
 			},
 			mockEnv,
 		);
 
-		expect(res.status).toBe(403);
-		const json = (await res.json()) as ErrorResponse;
-		expect(json.error).toBe("forbidden");
+		expect(res.status).toBe(401);
+		expect(updateSubscriptionTier).not.toHaveBeenCalled();
+	});
+
+	it("fails closed when SERVICE_SECRET is unset", async () => {
+		mockEnv.SERVICE_SECRET = undefined;
+
+		const app = createApp();
+		const res = await app.request(
+			`/subscription/${TEST_USER_ID}/tier`,
+			{
+				method: "PUT",
+				headers: { "Content-Type": "application/json", Authorization: "Bearer " },
+				body: JSON.stringify({ tier: "evergreen" }),
+			},
+			mockEnv,
+		);
+
+		expect(res.status).toBe(401);
 	});
 
 	it("returns 429 when rate limited", async () => {
@@ -644,11 +764,7 @@ describe("PUT /subscription/:userId/tier", () => {
 		const app = createApp();
 		const res = await app.request(
 			`/subscription/${TEST_USER_ID}/tier`,
-			{
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ tier: "evergreen" }),
-			},
+			{ method: "PUT", headers: serviceHeaders(), body: JSON.stringify({ tier: "evergreen" }) },
 			mockEnv,
 		);
 
@@ -659,11 +775,7 @@ describe("PUT /subscription/:userId/tier", () => {
 		const app = createApp();
 		const res = await app.request(
 			`/subscription/${TEST_USER_ID}/tier`,
-			{
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: "not valid json",
-			},
+			{ method: "PUT", headers: serviceHeaders(), body: "not valid json" },
 			mockEnv,
 		);
 
@@ -677,11 +789,7 @@ describe("PUT /subscription/:userId/tier", () => {
 		const app = createApp();
 		const res = await app.request(
 			`/subscription/${TEST_USER_ID}/tier`,
-			{
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({}),
-			},
+			{ method: "PUT", headers: serviceHeaders(), body: JSON.stringify({}) },
 			mockEnv,
 		);
 
@@ -695,11 +803,7 @@ describe("PUT /subscription/:userId/tier", () => {
 		const app = createApp();
 		const res = await app.request(
 			`/subscription/${TEST_USER_ID}/tier`,
-			{
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ tier: "invalid_tier" }),
-			},
+			{ method: "PUT", headers: serviceHeaders(), body: JSON.stringify({ tier: "invalid_tier" }) },
 			mockEnv,
 		);
 
@@ -708,18 +812,25 @@ describe("PUT /subscription/:userId/tier", () => {
 		expect(json.error).toBe("invalid_request");
 	});
 
+	it("returns 400 for a tier with different casing (case-sensitive match)", async () => {
+		const app = createApp();
+		const res = await app.request(
+			`/subscription/${TEST_USER_ID}/tier`,
+			{ method: "PUT", headers: serviceHeaders(), body: JSON.stringify({ tier: "Evergreen" }) },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(400);
+	});
+
 	it("upgrades tier to evergreen", async () => {
-		const upgradedSub = { ...mockSubscription, tier: "evergreen" };
+		const upgradedSub = { ...mockSubscription, tier: "evergreen" as const };
 		(updateSubscriptionTier as ReturnType<typeof vi.fn>).mockResolvedValue(upgradedSub);
 
 		const app = createApp();
 		const res = await app.request(
 			`/subscription/${TEST_USER_ID}/tier`,
-			{
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ tier: "evergreen" }),
-			},
+			{ method: "PUT", headers: serviceHeaders(), body: JSON.stringify({ tier: "evergreen" }) },
 			mockEnv,
 		);
 
@@ -734,17 +845,13 @@ describe("PUT /subscription/:userId/tier", () => {
 	});
 
 	it("downgrades tier to seedling", async () => {
-		const downgradedSub = { ...mockSubscription, tier: "seedling" };
+		const downgradedSub = { ...mockSubscription, tier: "seedling" as const };
 		(updateSubscriptionTier as ReturnType<typeof vi.fn>).mockResolvedValue(downgradedSub);
 
 		const app = createApp();
 		const res = await app.request(
 			`/subscription/${TEST_USER_ID}/tier`,
-			{
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ tier: "seedling" }),
-			},
+			{ method: "PUT", headers: serviceHeaders(), body: JSON.stringify({ tier: "seedling" }) },
 			mockEnv,
 		);
 
@@ -754,34 +861,25 @@ describe("PUT /subscription/:userId/tier", () => {
 	});
 
 	it("allows all valid tiers", async () => {
-		const validTiers = ["seedling", "sapling", "oak", "evergreen"];
+		const validTiers = ["seedling", "sapling", "oak", "evergreen"] as const;
 
 		for (const tier of validTiers) {
 			vi.clearAllMocks();
-			(verifyBearerAuth as ReturnType<typeof vi.fn>).mockResolvedValue({
-				sub: TEST_USER_ID,
-			});
+			mockEnv.SERVICE_SECRET = SERVICE_SECRET;
 			(checkRouteRateLimit as ReturnType<typeof vi.fn>).mockResolvedValue({
 				allowed: true,
 				remaining: 10,
 			});
 			(getOrCreateUserSubscription as ReturnType<typeof vi.fn>).mockResolvedValue(mockSubscription);
 
-			const tierSub = {
-				...mockSubscription,
-				tier: tier as typeof mockSubscription.tier,
-			};
+			const tierSub = { ...mockSubscription, tier };
 			(updateSubscriptionTier as ReturnType<typeof vi.fn>).mockResolvedValue(tierSub);
 			(getSubscriptionStatus as ReturnType<typeof vi.fn>).mockReturnValue(mockStatus);
 
 			const app = createApp();
 			const res = await app.request(
 				`/subscription/${TEST_USER_ID}/tier`,
-				{
-					method: "PUT",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ tier }),
-				},
+				{ method: "PUT", headers: serviceHeaders(), body: JSON.stringify({ tier }) },
 				mockEnv,
 			);
 
@@ -797,11 +895,7 @@ describe("PUT /subscription/:userId/tier", () => {
 		const app = createApp();
 		const res = await app.request(
 			`/subscription/${TEST_USER_ID}/tier`,
-			{
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ tier: "evergreen" }),
-			},
+			{ method: "PUT", headers: serviceHeaders(), body: JSON.stringify({ tier: "evergreen" }) },
 			mockEnv,
 		);
 
@@ -816,11 +910,7 @@ describe("PUT /subscription/:userId/tier", () => {
 		const app = createApp();
 		await app.request(
 			`/subscription/${TEST_USER_ID}/tier`,
-			{
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ tier: "evergreen" }),
-			},
+			{ method: "PUT", headers: serviceHeaders(), body: JSON.stringify({ tier: "evergreen" }) },
 			mockEnv,
 		);
 

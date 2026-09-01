@@ -19,10 +19,70 @@ import {
 	registerRequestForBridge,
 	getSessionBridgeResult,
 	cleanupRequestContext,
+	redactId,
 } from "../lib/sessionBridge.js";
-import { createSessionCookieHeader } from "../lib/session.js";
+import {
+	createSessionCookieHeader,
+	clearSessionCookieHeader,
+	getSessionFromRequest,
+} from "../lib/session.js";
+import type { SessionDO } from "../durables/SessionDO.js";
 
 const betterAuthRoutes = new Hono<{ Bindings: Env }>();
+
+/**
+ * Extract the hostname from a callbackURL query param, or null if it's
+ * missing/unparseable. Used to pick the error-redirect base by an exact
+ * hostname match rather than `callbackURL.includes("plant.grove.place")`,
+ * which a crafted URL like `https://evil.com/?x=plant.grove.place` would
+ * also match (not exploitable as an open redirect — errorBase is always one
+ * of three fixed values — but exact matching is the honest check).
+ */
+function getCallbackHostname(callbackURL: string | null): string | null {
+	if (!callbackURL) return null;
+	try {
+		return new URL(callbackURL).hostname;
+	} catch {
+		return null;
+	}
+}
+
+// Bound how much of a 5xx response body gets logged — BA's own responses are
+// generic today, but nothing guarantees a future error payload stays small.
+const MAX_LOGGED_BODY_LENGTH = 500;
+
+/**
+ * Better Auth's /sign-out only clears its own cookies (better-auth.session_token)
+ * and deletes the ba_session row. It never touches grove_session — which is a
+ * fully sufficient standalone credential for every grove_session-gated route
+ * (admin cookie auth, /session/*, device authorization). Without this, a user
+ * who signs out via Better Auth keeps a live 30-day grove_session cookie.
+ */
+async function clearGroveSessionOnSignOut(
+	request: Request,
+	env: Env,
+	response: Response,
+): Promise<Response> {
+	const parsedSession = await getSessionFromRequest(request, env.SESSION_SECRET);
+	if (parsedSession) {
+		try {
+			const sessionDO = env.SESSIONS.get(
+				env.SESSIONS.idFromName(`session:${parsedSession.userId}`),
+			) as DurableObjectStub<SessionDO>;
+			await sessionDO.revokeSession(parsedSession.sessionId);
+		} catch (error) {
+			console.error("[BetterAuth] Failed to revoke grove_session on sign-out:", error);
+		}
+	}
+
+	const newHeaders = new Headers(response.headers);
+	newHeaders.append("Set-Cookie", clearSessionCookieHeader());
+	return new Response(response.body, {
+		status: response.status,
+		statusText: response.statusText,
+		headers: newHeaders,
+	});
+}
 
 /**
  * Catch-all handler for Better Auth endpoints
@@ -87,12 +147,30 @@ betterAuthRoutes.all("/*", async (c) => {
 				// Log with redacted ID to prevent exposure in log aggregation
 				console.log(
 					"[BetterAuth] Added grove_session cookie for user",
-					bridgeResult.userId.slice(0, 6) + "...",
+					redactId(bridgeResult.userId),
 				);
 			} catch (cookieError) {
 				// Log but don't fail - BA session is still valid
 				console.error("[BetterAuth] Failed to add grove_session cookie:", cookieError);
 			}
+		}
+
+		// Better Auth's /sign-out never touches grove_session — mirror that
+		// teardown here so signing out actually signs out of every mechanism.
+		if (c.req.method === "POST" && c.req.path.endsWith("/sign-out") && response.ok) {
+			response = await clearGroveSessionOnSignOut(c.req.raw, c.env, response);
+		}
+
+		// This route serves per-user session/auth data through a catch-all —
+		// nothing should cache it.
+		if (!response.headers.has("Cache-Control")) {
+			const newHeaders = new Headers(response.headers);
+			newHeaders.set("Cache-Control", "no-store");
+			response = new Response(response.body, {
+				status: response.status,
+				statusText: response.statusText,
+				headers: newHeaders,
+			});
 		}
 
 		// Clean up request context to prevent memory leaks
@@ -106,7 +184,10 @@ betterAuthRoutes.all("/*", async (c) => {
 			const clonedResponse = response.clone();
 			try {
 				const body = await clonedResponse.text();
-				console.error("[BetterAuth] 5xx response body:", body || "(empty)");
+				console.error(
+					"[BetterAuth] 5xx response body:",
+					(body || "(empty)").slice(0, MAX_LOGGED_BODY_LENGTH),
+				);
 			} catch (e) {
 				console.error("[BetterAuth] Could not read response body");
 			}
@@ -114,6 +195,27 @@ betterAuthRoutes.all("/*", async (c) => {
 
 		return response;
 	} catch (error) {
+		// If the SessionDO bridge already succeeded before this throw (e.g. BA
+		// failed while serializing its own response after the session.create
+		// hook ran), that session was never delivered as a cookie and never
+		// will be — revoke it so it doesn't linger as a phantom device in
+		// /session/list.
+		const orphanedBridge = getSessionBridgeResult(c.req.raw);
+		if (orphanedBridge?.sessionId && !orphanedBridge.error) {
+			try {
+				const sessionDO = c.env.SESSIONS.get(
+					c.env.SESSIONS.idFromName(`session:${orphanedBridge.userId}`),
+				) as DurableObjectStub<SessionDO>;
+				await sessionDO.revokeSession(orphanedBridge.sessionId);
+			} catch (revokeError) {
+				console.error(
+					"[BetterAuth] Failed to revoke orphaned session after handler error:",
+					revokeError,
+				);
+			}
+		}
+		cleanupRequestContext(c.req.raw);
+
 		// Log the actual error for debugging
 		console.error("[BetterAuth] Handler error:", error);
 		console.error("[BetterAuth] Error stack:", error instanceof Error ? error.stack : "No stack");
@@ -130,7 +232,7 @@ betterAuthRoutes.all("/*", async (c) => {
 			let errorBase: string;
 			if (isLocalDev) {
 				errorBase = c.env.AUTH_BASE_URL;
-			} else if (callbackURL?.includes("plant.grove.place")) {
+			} else if (getCallbackHostname(callbackURL) === "plant.grove.place") {
 				errorBase = "https://plant.grove.place";
 			} else {
 				errorBase = "https://heartwood.grove.place";

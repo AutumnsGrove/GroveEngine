@@ -51,8 +51,67 @@ export async function revokeRefreshToken(
 		.run();
 }
 
-export async function revokeAllUserTokens(db: D1DatabaseOrSession, userId: string): Promise<void> {
-	await db.prepare("UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ?").bind(userId).run();
+/**
+ * Atomically validate and revoke (rotate) a refresh token in one statement.
+ * Mirrors consumeAuthCode's UPDATE...RETURNING pattern: a plain
+ * read-then-write here would let two concurrent requests both pass
+ * validation on the same token before either revoke lands, minting two
+ * independent valid token families from a single stolen token.
+ *
+ * Returns null if the token doesn't exist, was already revoked, belongs to
+ * a different client, or has expired — the caller can't distinguish which,
+ * by design (an attacker probing shouldn't learn which check failed).
+ */
+export async function consumeRefreshToken(
+	db: D1DatabaseOrSession,
+	tokenHash: string,
+	clientId: string,
+): Promise<RefreshToken | null> {
+	const now = new Date().toISOString();
+	return db
+		.prepare(
+			`UPDATE refresh_tokens
+       SET revoked = 1
+       WHERE token_hash = ?
+         AND revoked = 0
+         AND client_id = ?
+         AND expires_at > ?
+       RETURNING *`,
+		)
+		.bind(tokenHash, clientId, now)
+		.first<RefreshToken>();
+}
+
+/**
+ * Look up a refresh token regardless of revoked/expired status — used only
+ * to detect reuse of an already-rotated token (see consumeRefreshToken),
+ * never to authenticate a request.
+ */
+export async function getRefreshTokenByHashAnyStatus(
+	db: D1DatabaseOrSession,
+	tokenHash: string,
+): Promise<RefreshToken | null> {
+	return db
+		.prepare("SELECT * FROM refresh_tokens WHERE token_hash = ?")
+		.bind(tokenHash)
+		.first<RefreshToken>();
+}
+
+/**
+ * Revoke every active refresh token for a user. Returns the number of rows
+ * actually changed — the `AND revoked = 0` predicate means a repeat call
+ * (e.g. a caller hitting /logout multiple times with the same still-valid
+ * access token) doesn't rewrite already-revoked rows.
+ */
+export async function revokeAllUserTokens(
+	db: D1DatabaseOrSession,
+	userId: string,
+): Promise<number> {
+	const result = await db
+		.prepare("UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ? AND revoked = 0")
+		.bind(userId)
+		.run();
+	return result.meta?.changes ?? 0;
 }
 
 export async function cleanupExpiredRefreshTokens(db: D1DatabaseOrSession): Promise<void> {

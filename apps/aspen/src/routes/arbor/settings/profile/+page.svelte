@@ -579,6 +579,7 @@
 	<!-- Greenhouse Status -->
 	<GreenhouseStatusCard
 		inGreenhouse={data.greenhouseStatus?.inGreenhouse ?? false}
+		isBeta={data.isBeta ?? false}
 		enrolledAt={data.greenhouseStatus?.enrolledAt}
 		notes={data.greenhouseStatus?.notes}
 		waystone="what-is-greenhouse"

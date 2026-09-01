@@ -10,7 +10,7 @@
 import type { Context, Next } from "hono";
 import type { Env } from "../types.js";
 import { verifyAccessToken } from "../services/jwt.js";
-import { isUserAdmin, getUserById, isEmailAdmin } from "../db/queries.js";
+import { isUserAdmin } from "../db/queries.js";
 import { createDbSession } from "../db/session.js";
 import { extractBearerToken } from "./bearerAuth.js";
 import { getSessionFromRequest } from "../lib/session.js";
@@ -63,9 +63,13 @@ export function adminCookieAuth() {
 
 			if (result.valid) {
 				const db = createDbSession(c.env);
-				const user = await getUserById(db, parsedSession.userId);
+				// Single definition of "who is an admin" (isUserAdmin) — this
+				// path previously re-implemented the check inline, which is
+				// exactly the kind of duplication that can silently drift from
+				// the other two auth paths below.
+				const isAdmin = await isUserAdmin(db, parsedSession.userId);
 
-				if (user && (user.is_admin === 1 || isEmailAdmin(user.email))) {
+				if (isAdmin) {
 					return next();
 				}
 
