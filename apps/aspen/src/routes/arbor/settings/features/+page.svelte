@@ -121,7 +121,10 @@
 					<featureIcons.pencilSparkles class="icon" />
 				</div>
 				<div class="feature-content">
-					<div class="feature-title">Sparks</div>
+					<div class="feature-title">
+						Sparks
+						<Waystone slug="what-are-sparks" label="Learn about Sparks" />
+					</div>
 					<p class="feature-description">
 						Writing prompts that offer a starting point on a blank <GroveTerm
 							interactive

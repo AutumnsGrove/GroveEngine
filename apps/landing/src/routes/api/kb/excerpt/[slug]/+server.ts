@@ -85,6 +85,7 @@ const WAYSTONE_ARTICLE_SLUGS = [
 	"choosing-a-theme",
 	"custom-fonts",
 	"what-is-rings",
+	"what-are-sparks",
 	"what-is-journey",
 	"what-is-gallery",
 	"what-are-curios",

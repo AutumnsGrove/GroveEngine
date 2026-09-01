@@ -74,6 +74,7 @@ The toolbar also shows your current mode (Source, Split, or Preview), a full-pre
 ## Related
 
 - [Writing your first post](/knowledge/help/writing-your-first-post)
+- [What are Sparks?](/knowledge/help/what-are-sparks) — Writing prompts for a blank draft
 - [What are Vines?](/knowledge/help/what-are-vines) — Margin notes in your posts
 - [Flow Specification](/knowledge/specs/flow-spec)
 - [Grove Workshop → Flow](/workshop#tool-flow)
