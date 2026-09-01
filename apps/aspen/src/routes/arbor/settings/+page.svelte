@@ -488,9 +488,4 @@
 		}
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		.status-dot {
-			transition: none;
-		}
-	}
 </style>
