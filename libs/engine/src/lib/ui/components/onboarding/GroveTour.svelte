@@ -68,9 +68,27 @@
 		touchEndX = 0;
 	}
 
+	interface TourImage {
+		url: string;
+		alt: string;
+		/** Shown under the image when rendered inside the multi-image GlassCarousel */
+		caption?: string;
+		/** CSS aspect-ratio override for single-image stops whose screenshot isn't ~4:3 */
+		aspect?: string;
+	}
+
+	interface TourStop {
+		id: string;
+		title: string;
+		description: string;
+		location: string;
+		url: string | null;
+		images: TourImage[];
+	}
+
 	// Tour stops configuration — `images` is empty for text-only stops (welcome/complete),
 	// a single entry for a plain screenshot, or multiple entries to render as a GlassCarousel.
-	const tourStops = [
+	const tourStops: TourStop[] = [
 		{
 			id: "welcome",
 			title: "Welcome to the Tour!",
@@ -208,7 +226,7 @@
 			url: null,
 			images: [],
 		},
-	] as const;
+	];
 
 	// Compute current tour stop with reactive description for final step
 	const currentTourStop = $derived({
