@@ -30,20 +30,26 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 	const env = platform?.env;
 
 	if (!env?.DB || !locals.tenantId) {
-		return loadProfileData(
-			{ DB: null as unknown as D1Database },
-			"",
-			locals.user?.email,
-			locals.user?.picture ?? null,
-		);
+		return {
+			...(await loadProfileData(
+				{ DB: null as unknown as D1Database },
+				"",
+				locals.user?.email,
+				locals.user?.picture ?? null,
+			)),
+			isBeta: locals.isBeta ?? false,
+		};
 	}
 
-	return loadProfileData(
-		{ DB: env.DB, CACHE_KV: env.CACHE_KV },
-		locals.tenantId,
-		locals.user?.email,
-		locals.user?.picture ?? null,
-	);
+	return {
+		...(await loadProfileData(
+			{ DB: env.DB, CACHE_KV: env.CACHE_KV },
+			locals.tenantId,
+			locals.user?.email,
+			locals.user?.picture ?? null,
+		)),
+		isBeta: locals.isBeta ?? false,
+	};
 };
 
 export const actions: Actions = {

@@ -40,9 +40,6 @@
 			{/if}
 			<h2>
 				<GroveTerm term="arbor">{brandTitle}</GroveTerm>
-				<span class="arbor-admin-label"
-					>(<GroveTerm term="arbor" standard="dashboard">admin panel</GroveTerm>)</span
-				>
 			</h2>
 		</div>
 	{:else}
@@ -89,17 +86,6 @@
 		white-space: nowrap;
 		overflow: hidden;
 		color: var(--grove-accent);
-	}
-
-	.arbor-admin-label {
-		font-size: 0.7rem;
-		font-weight: 400;
-		color: var(--color-text-muted);
-		opacity: 0.7;
-	}
-
-	:global(.dark) .arbor-admin-label {
-		color: var(--grove-text-subtle);
 	}
 
 	:global(.arbor-sidebar-logo) {
