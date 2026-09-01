@@ -1,8 +1,11 @@
 /**
  * Comped Invites - Business Logic Service
  *
- * Handles CRUD operations, audit logging, email sending,
- * and bulk promotion for comped/beta invites.
+ * Handles CRUD operations, audit logging, and email sending
+ * for comped invites.
+ *
+ * New invites are always "comped". The legacy "beta" invite type still appears
+ * on historical rows, so reads (list, resend, revoke) stay type-agnostic.
  */
 
 import { sendInviteEmail } from "$lib/server/invite-email";
@@ -37,14 +40,6 @@ export interface AuditLogEntry {
 	actor_email: string;
 	notes: string | null;
 	created_at: number;
-}
-
-export interface EligibleSubscriber {
-	id: number;
-	email: string;
-	name: string | null;
-	created_at: string;
-	source: string;
 }
 
 interface EmailEnv {
@@ -108,7 +103,7 @@ export async function loadInviteData(DB: D1Database, filters: LoadFilters) {
 	}
 
 	// Run all queries in parallel
-	const [invitesList, countResult, auditList, statsResult, eligibleList] = await Promise.all([
+	const [invitesList, countResult, auditList, statsResult] = await Promise.all([
 		queryMany<CompedInvite>(DB, query, params),
 		queryOne<{ count: number }>(DB, countQuery, countParams),
 		queryMany<AuditLogEntry>(
@@ -125,24 +120,11 @@ export async function loadInviteData(DB: D1Database, filters: LoadFilters) {
              COUNT(CASE WHEN invite_type = 'comped' THEN 1 END) as comped
            FROM comped_invites`,
 		),
-		// Find email subscribers who are eligible for beta promotion
-		queryMany<EligibleSubscriber>(
-			DB,
-			`SELECT es.id, es.email, es.name, es.created_at, es.source
-           FROM email_signups es
-           LEFT JOIN comped_invites ci ON LOWER(es.email) = LOWER(ci.email)
-           LEFT JOIN tenants t ON LOWER(es.email) = LOWER(t.email)
-           WHERE es.unsubscribed_at IS NULL
-             AND ci.id IS NULL
-             AND t.id IS NULL
-           ORDER BY es.created_at DESC`,
-		),
 	]);
 
 	return {
 		invites: invitesList,
 		auditLog: auditList,
-		eligibleSubscribers: eligibleList,
 		stats: {
 			total: statsResult?.total || 0,
 			used: statsResult?.used || 0,
@@ -166,14 +148,16 @@ export async function loadInviteData(DB: D1Database, filters: LoadFilters) {
 export interface CreateInviteParams {
 	email: string;
 	tier: string;
-	inviteType: string;
 	customMessage: string | null;
 	notes: string | null;
 	actorEmail: string;
 }
 
+/** Every invite created from here on is a comped account. */
+const NEW_INVITE_TYPE = "comped" as const;
+
 export async function createInvite(DB: D1Database, params: CreateInviteParams, emailEnv: EmailEnv) {
-	const { email, tier, inviteType, customMessage, notes, actorEmail } = params;
+	const { email, tier, customMessage, notes, actorEmail } = params;
 
 	if (!EMAIL_RE.test(email)) {
 		return { success: false as const, error: "Please enter a valid email address" };
@@ -211,7 +195,7 @@ export async function createInvite(DB: D1Database, params: CreateInviteParams, e
 			DB,
 			`INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, unixepoch())`,
-			[inviteId, email, tier, inviteType, customMessage, actorEmail, inviteToken],
+			[inviteId, email, tier, NEW_INVITE_TYPE, customMessage, actorEmail, inviteToken],
 		);
 
 		step = "insert-audit";
@@ -220,7 +204,7 @@ export async function createInvite(DB: D1Database, params: CreateInviteParams, e
 			DB,
 			`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
          VALUES (?, 'create', ?, ?, ?, ?, ?, ?, unixepoch())`,
-			[auditId, inviteId, email, tier, inviteType, actorEmail, notes],
+			[auditId, inviteId, email, tier, NEW_INVITE_TYPE, actorEmail, notes],
 		);
 
 		// Send the invite email via Zephyr
@@ -228,7 +212,6 @@ export async function createInvite(DB: D1Database, params: CreateInviteParams, e
 		const emailResult = await sendInviteEmailWrapped({
 			email,
 			tier,
-			inviteType: inviteType as "comped" | "beta",
 			customMessage,
 			inviteToken,
 			invitedBy: actorEmail,
@@ -237,12 +220,11 @@ export async function createInvite(DB: D1Database, params: CreateInviteParams, e
 			emailEnv,
 		});
 
-		const typeLabel = inviteType === "beta" ? "beta" : "comped";
 		return {
 			success: true as const,
 			emailStatus: emailResult.status,
 			emailError: emailResult.error,
-			message: `Created ${typeLabel} invite for ${email} (${tier} tier)`,
+			message: `Created comped invite for ${email} (${tier} tier)`,
 		};
 	} catch (err) {
 		const message = err instanceof Error ? err.message : "Unknown database error";
@@ -415,259 +397,12 @@ export async function revokeInvite(
 }
 
 // ============================================================================
-// Promote Subscriber
-// ============================================================================
-
-export interface PromoteParams {
-	email: string;
-	tier: string;
-	customMessage: string | null;
-	actorEmail: string;
-}
-
-export async function promoteSubscriber(DB: D1Database, params: PromoteParams, emailEnv: EmailEnv) {
-	const { email, tier, customMessage, actorEmail } = params;
-
-	if (!EMAIL_RE.test(email)) {
-		return { success: false as const, error: "Invalid email address" };
-	}
-
-	let step = "check-subscriber";
-	try {
-		// Run all three eligibility checks in parallel
-		const [subscriber, existing, existingTenant] = await Promise.all([
-			queryOne<{ id: number; email: string }>(
-				DB,
-				"SELECT id, email FROM email_signups WHERE LOWER(email) = LOWER(?) AND unsubscribed_at IS NULL",
-				[email],
-			),
-			queryOne<{ id: string; used_at: number | null }>(
-				DB,
-				"SELECT id, used_at FROM comped_invites WHERE LOWER(email) = LOWER(?)",
-				[email],
-			),
-			queryOne<{ subdomain: string }>(
-				DB,
-				"SELECT subdomain FROM tenants WHERE LOWER(email) = LOWER(?)",
-				[email],
-			),
-		]);
-
-		if (!subscriber) {
-			return { success: false as const, error: `${email} is not an active email subscriber` };
-		}
-
-		if (existing) {
-			if (existing.used_at) {
-				return { success: false as const, error: `${email} has already used their invite` };
-			}
-			return { success: false as const, error: `${email} already has a pending invite` };
-		}
-
-		if (existingTenant) {
-			return {
-				success: false as const,
-				error: `${email} is already a Grove user (${existingTenant.subdomain}.grove.place)`,
-			};
-		}
-
-		// Create the beta invite
-		step = "insert-invite";
-		const inviteId = crypto.randomUUID();
-		const inviteToken = crypto.randomUUID();
-		await execute(
-			DB,
-			`INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
-         VALUES (?, ?, ?, 'beta', ?, ?, ?, unixepoch())`,
-			[inviteId, email, tier, customMessage, actorEmail, inviteToken],
-		);
-
-		// Audit log
-		step = "insert-audit";
-		await execute(
-			DB,
-			`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
-         VALUES (?, 'create', ?, ?, ?, 'beta', ?, 'Promoted from email list', unixepoch())`,
-			[crypto.randomUUID(), inviteId, email, tier, actorEmail],
-		);
-
-		// Send the invite email
-		step = "send-email";
-		const emailResult = await sendInviteEmailWrapped({
-			email,
-			tier,
-			inviteType: "beta",
-			customMessage,
-			inviteToken,
-			invitedBy: actorEmail,
-			inviteId,
-			DB,
-			emailEnv,
-		});
-
-		return {
-			success: true as const,
-			emailStatus: emailResult.status,
-			emailError: emailResult.error,
-			message: `Promoted ${email} to beta (${tier} tier)`,
-		};
-	} catch (err) {
-		const message = err instanceof Error ? err.message : "Unknown database error";
-		console.error(`[Comped Invites] Error promoting subscriber at step "${step}":`, message, err);
-		return {
-			success: false as const,
-			error: `Failed to promote subscriber (${step}): ${message}`,
-			status: 500,
-		};
-	}
-}
-
-// ============================================================================
-// Bulk Promote
-// ============================================================================
-
-export interface BulkPromoteParams {
-	tier: string;
-	customMessage: string | null;
-	actorEmail: string;
-}
-
-export async function bulkPromoteSubscribers(
-	DB: D1Database,
-	params: BulkPromoteParams,
-	emailEnv: EmailEnv,
-) {
-	const { tier, customMessage, actorEmail } = params;
-
-	// Cap batch size to avoid worker timeout (4 async ops per subscriber)
-	const BATCH_LIMIT = 50;
-
-	try {
-		// Find eligible subscribers (capped to avoid worker timeout)
-		const subscribers = await queryMany<{ id: number; email: string }>(
-			DB,
-			`SELECT es.id, es.email
-         FROM email_signups es
-         LEFT JOIN comped_invites ci ON LOWER(es.email) = LOWER(ci.email)
-         LEFT JOIN tenants t ON LOWER(es.email) = LOWER(t.email)
-         WHERE es.unsubscribed_at IS NULL
-           AND ci.id IS NULL
-           AND t.id IS NULL
-         ORDER BY es.created_at ASC
-         LIMIT ?`,
-			[BATCH_LIMIT],
-		);
-		if (subscribers.length === 0) {
-			return { success: false as const, error: "No eligible subscribers to promote", status: 400 };
-		}
-
-		const zephyrApiKey = emailEnv.ZEPHYR_API_KEY || emailEnv.RESEND_API_KEY;
-
-		let promoted = 0;
-		let emailsSent = 0;
-		let emailsFailed = 0;
-		const errors: string[] = [];
-
-		for (const sub of subscribers) {
-			const inviteId = crypto.randomUUID();
-			const inviteToken = crypto.randomUUID();
-
-			try {
-				// Create the invite (OR IGNORE handles race if already promoted)
-				const insertResult = await execute(
-					DB,
-					`INSERT OR IGNORE INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
-             VALUES (?, ?, ?, 'beta', ?, ?, ?, unixepoch())`,
-					[inviteId, sub.email, tier, customMessage, actorEmail, inviteToken],
-				);
-
-				// Skip if already promoted by a concurrent request
-				if (insertResult.meta.changes === 0) {
-					continue;
-				}
-
-				// Audit log
-				await execute(
-					DB,
-					`INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
-             VALUES (?, 'create', ?, ?, ?, 'beta', ?, 'Bulk promoted from email list', unixepoch())`,
-					[crypto.randomUUID(), inviteId, sub.email, tier, actorEmail],
-				);
-
-				promoted++;
-
-				// Send the invite email
-				if (zephyrApiKey) {
-					const emailResult = await sendInviteEmail({
-						email: sub.email,
-						tier,
-						inviteType: "beta",
-						customMessage,
-						inviteToken,
-						invitedBy: actorEmail,
-						zephyrApiKey,
-						zephyrUrl: emailEnv.ZEPHYR_URL,
-						zephyrBinding: emailEnv.ZEPHYR,
-					});
-
-					if (emailResult.success) {
-						emailsSent++;
-						await execute(
-							DB,
-							`UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`,
-							[inviteId],
-						);
-					} else {
-						emailsFailed++;
-						console.error(
-							`[Comped Invites] Bulk email failed for ${sub.email}:`,
-							emailResult.error,
-						);
-					}
-				}
-			} catch (err) {
-				const message = err instanceof Error ? err.message : "Unknown error";
-				errors.push(`${sub.email}: ${message}`);
-				console.error(`[Comped Invites] Bulk promote error for ${sub.email}:`, message);
-			}
-		}
-
-		const emailNote = zephyrApiKey
-			? ` (${emailsSent} emails sent${emailsFailed > 0 ? `, ${emailsFailed} failed` : ""})`
-			: " (no email API key configured — emails not sent)";
-
-		const errorNote = errors.length > 0 ? ` (${errors.length} failed)` : "";
-
-		return {
-			success: true as const,
-			emailStatus:
-				emailsFailed > 0
-					? ("partial" as const)
-					: emailsSent > 0
-						? ("sent" as const)
-						: ("not-configured" as const),
-			message: `Promoted ${promoted} of ${subscribers.length} subscribers to beta (${tier} tier)${errorNote}${emailNote}`,
-			promoteErrors: errors.length > 0 ? errors : undefined,
-		};
-	} catch (err) {
-		const message = err instanceof Error ? err.message : "Unknown database error";
-		console.error("[Comped Invites] Error in bulk promote:", message, err);
-		return {
-			success: false as const,
-			error: `Failed to bulk promote subscribers: ${message}`,
-			status: 500,
-		};
-	}
-}
-
-// ============================================================================
 // Internal Helpers
 // ============================================================================
 
 async function sendInviteEmailWrapped(opts: {
 	email: string;
 	tier: string;
-	inviteType: "comped" | "beta";
 	customMessage: string | null;
 	inviteToken: string;
 	invitedBy: string;
@@ -687,7 +422,7 @@ async function sendInviteEmailWrapped(opts: {
 	const emailResult = await sendInviteEmail({
 		email: opts.email,
 		tier: opts.tier,
-		inviteType: opts.inviteType,
+		inviteType: NEW_INVITE_TYPE,
 		customMessage: opts.customMessage,
 		inviteToken: opts.inviteToken,
 		invitedBy: opts.invitedBy,

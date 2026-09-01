@@ -2,14 +2,16 @@
 	/**
 	 * Comped Invites Admin Page (Landing)
 	 *
-	 * Allows the Wayfinder to create comped invites for friends,
-	 * beta testers, and other special accounts.
+	 * Allows the Wayfinder to comp free accounts for friends, family,
+	 * and other special cases. Every new invite is a comped invite —
+	 * the old waitlist→beta-tester flow is retired, though historical
+	 * beta invites remain visible in the list and can still be resent.
 	 */
 
 	import { enhance } from "$app/forms";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
-	import { blazeIcons, actionIcons, navIcons, stateIcons, featureIcons, metricIcons, authIcons, phaseIcons } from "@autumnsgrove/prism/icons";
+	import { blazeIcons, actionIcons, navIcons, stateIcons, featureIcons, metricIcons } from "@autumnsgrove/prism/icons";
 	const Gift = blazeIcons.gift;
 	const Plus = actionIcons.plus;
 	const Trash2 = actionIcons.trash;
@@ -29,17 +31,13 @@
 	const Clock = metricIcons.clock;
 	const Eye = stateIcons.eye;
 	const EyeOff = stateIcons.eyeOff;
-	const Users = authIcons.users;
-	const ArrowUpRight = navIcons.arrowUpRight;
-	const Zap = phaseIcons.zap;
-	import { GlassCard, GroveTerm } from "@autumnsgrove/lattice/ui";
+	import { GlassCard } from "@autumnsgrove/lattice/ui";
 
 	let { data, form } = $props();
 
 	// Form state
 	let newEmail = $state("");
 	let newTier = $state<string>("seedling");
-	let newInviteType = $state<"beta" | "comped">("beta");
 	let newMessage = $state("");
 	let newNotes = $state("");
 	let isAdding = $state(false);
@@ -64,35 +62,14 @@
 		});
 	}
 
-	// Promote state
-	let promoteTier = $state<string>("seedling");
-	let promoteMessage = $state("");
-	let isPromoting = $state<string | null>(null); // email currently being promoted
-	let isPromotingAll = $state(false);
-	let showEligible = $state(true);
-
-	// Email preview content (mirrors BetaInviteEmail.tsx template)
-	const emailContent = {
-		beta: {
-			subject: "You're invited to the Grove beta",
-			intro:
-				"We're building something different — a quiet corner of the internet where your words actually belong to you. No algorithms, no ads, no tracking.",
-			middle: "We'd love for you to be one of the first to try it.",
-			feedback:
-				"As a beta tester, your feedback helps shape what Grove becomes. Every rough edge you find makes this place better for everyone who comes after.",
-			cta: "Join the Beta",
-		},
-		comped: {
-			subject: "You've been invited to Grove",
-			intro:
-				"Someone believes you deserve your own corner of the internet — a quiet space where your words can grow without algorithms, ads, or tracking.",
-			middle: "Your space is waiting whenever you're ready.",
-			feedback: null,
-			cta: "Claim Your Invite",
-		},
+	// Email preview content (mirrors the comped variant of BetaInviteEmail.tsx)
+	const previewContent = {
+		subject: "You've been invited to Grove",
+		intro:
+			"Someone believes you deserve your own corner of the internet — a quiet space where your words can grow without algorithms, ads, or tracking.",
+		middle: "Your space is waiting whenever you're ready.",
+		cta: "Claim Your Invite",
 	} as const;
-
-	const previewContent = $derived(emailContent[newInviteType] || emailContent.beta);
 
 	// Search state
 	let searchQuery = $state("");
@@ -120,6 +97,7 @@
 		evergreen: "bg-accent-subtle text-accent border-accent",
 	};
 
+	// "beta" is display/filter only — no new beta invites can be created.
 	const typeLabels: Record<string, string> = {
 		beta: "Beta",
 		comped: "Comped",
@@ -174,7 +152,9 @@
 				<Gift class="w-6 h-6 text-grove-600 dark:text-grove-400" />
 				Comped Invites
 			</h1>
-			<p class="text-foreground-muted font-sans mt-1">Invite beta testers and friends to Grove</p>
+			<p class="text-foreground-muted font-sans mt-1">
+				Comp a free Grove account for a friend or family member
+			</p>
 		</div>
 
 		<!-- Stats -->
@@ -228,32 +208,12 @@
 						: ""}. You may need to resend manually.</span
 				>
 			</div>
-		{:else if form.emailStatus === "partial"}
-			<div
-				class="p-4 rounded-lg bg-warning-bg border border-warning text-warning flex items-center gap-2"
-			>
-				<AlertTriangle size={18} />
-				<span>Some invite emails failed to send. Check the audit log for details.</span>
-			</div>
 		{:else if form.emailStatus === "not-configured"}
 			<div
 				class="p-4 rounded-lg bg-warning-bg border border-warning text-warning flex items-center gap-2"
 			>
 				<AlertTriangle size={18} />
 				<span>Invite created, but no email API key is configured — email was not sent.</span>
-			</div>
-		{/if}
-		{#if form.promoteErrors?.length}
-			<div class="p-4 rounded-lg bg-error-bg border border-error text-error">
-				<div class="flex items-center gap-2 mb-2">
-					<AlertTriangle size={18} />
-					<span class="font-medium">Some promotions failed:</span>
-				</div>
-				<ul class="text-sm space-y-1 ml-6 list-disc">
-					{#each form.promoteErrors as promoteError}
-						<li>{promoteError}</li>
-					{/each}
-				</ul>
 			</div>
 		{/if}
 	{/if}
@@ -263,139 +223,6 @@
 			<AlertTriangle size={18} />
 			{form.error}
 		</div>
-	{/if}
-
-	<!-- Eligible Subscribers (from email list, not yet in beta) -->
-	{#if data.eligibleSubscribers.length > 0}
-		<GlassCard class="p-6">
-			<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-				<button
-					type="button"
-					onclick={() => (showEligible = !showEligible)}
-					class="flex items-center gap-2 text-lg font-serif text-foreground"
-				>
-					<Users class="w-5 h-5 text-info" />
-					Email Subscribers Ready for Beta
-					<span
-						class="px-2 py-0.5 text-xs rounded-full bg-info-bg text-info border border-info font-sans"
-					>
-						{data.eligibleSubscribers.length}
-					</span>
-				</button>
-
-				{#if showEligible}
-					<form
-						method="POST"
-						action="?/promote_all"
-						use:enhance={() => {
-							isPromotingAll = true;
-							return async ({ update }) => {
-								await update();
-								isPromotingAll = false;
-							};
-						}}
-						class="flex items-center gap-2"
-					>
-						<select
-							name="tier"
-							bind:value={promoteTier}
-							class="px-3 py-1.5 text-sm rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground focus:outline-none focus:border-grove-500"
-						>
-							{#each data.validTiers as tier}
-								<option value={tier}>{tierLabels[tier] || tier}</option>
-							{/each}
-						</select>
-						<input type="hidden" name="custom_message" value={promoteMessage} />
-						<button
-							type="submit"
-							disabled={isPromotingAll}
-							class="flex items-center gap-2 px-4 py-1.5 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-grove-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-						>
-							{#if isPromotingAll}
-								<Loader2 class="w-4 h-4 animate-spin" />
-								Promoting all...
-							{:else}
-								<Zap class="w-4 h-4" />
-								Promote All ({data.eligibleSubscribers.length})
-							{/if}
-						</button>
-					</form>
-				{/if}
-			</div>
-
-			{#if showEligible}
-				<div class="mb-3">
-					<input
-						type="text"
-						bind:value={promoteMessage}
-						placeholder="Optional welcome message for beta invite emails..."
-						class="w-full px-3 py-2 text-sm rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
-					/>
-				</div>
-
-				<p class="text-xs text-foreground-muted mb-3">
-					These people signed up for the email list but don't have a beta invite yet. Promoting them
-					creates an invite and sends the beta email.
-				</p>
-
-				<div
-					class="divide-y divide-border max-h-96 overflow-y-auto rounded-lg border border-border"
-				>
-					{#each data.eligibleSubscribers as sub}
-						<div class="px-4 py-3 flex items-center justify-between group hover:bg-surface-hover">
-							<div class="min-w-0">
-								<div class="flex items-center gap-2">
-									<span class="font-medium text-foreground text-sm truncate">{sub.email}</span>
-									{#if sub.name}
-										<span class="text-xs text-foreground-muted">({sub.name})</span>
-									{/if}
-								</div>
-								<div class="text-xs text-foreground-muted mt-0.5">
-									Signed up {new Date(sub.created_at).toLocaleDateString("en-US", {
-										month: "short",
-										day: "numeric",
-										year: "numeric",
-									})}
-									{#if sub.source && sub.source !== "landing"}
-										<span class="ml-1">via {sub.source}</span>
-									{/if}
-								</div>
-							</div>
-
-							<form
-								method="POST"
-								action="?/promote"
-								use:enhance={() => {
-									isPromoting = sub.email;
-									return async ({ update }) => {
-										await update();
-										isPromoting = null;
-									};
-								}}
-								class="flex-shrink-0"
-							>
-								<input type="hidden" name="email" value={sub.email} />
-								<input type="hidden" name="tier" value={promoteTier} />
-								<input type="hidden" name="custom_message" value={promoteMessage} />
-								<button
-									type="submit"
-									disabled={isPromoting === sub.email || isPromotingAll}
-									class="flex items-center gap-1.5 px-3 py-1 text-xs rounded-lg bg-info-bg text-info border border-info hover:bg-info/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-								>
-									{#if isPromoting === sub.email}
-										<Loader2 class="w-3 h-3 animate-spin" />
-										Promoting...
-									{:else}
-										<ArrowUpRight class="w-3 h-3" />
-										Promote
-									{/if}
-								</button>
-							</form>
-						</div>
-					{/each}
-				</div>
-			{/if}
-		</GlassCard>
 	{/if}
 
 	<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -423,8 +250,9 @@
 						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground focus:outline-none focus:border-grove-500"
 					>
 						<option value="">All types</option>
-						<option value="beta">Beta</option>
-						<option value="comped">Comped</option>
+						{#each data.validInviteTypes as inviteType}
+							<option value={inviteType}>{typeLabels[inviteType] || inviteType}</option>
+						{/each}
 					</select>
 
 					<select
@@ -658,42 +486,6 @@
 						</div>
 					</div>
 
-					<!-- Invite Type -->
-					<div>
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="block text-sm font-medium text-foreground mb-2"> Invite Type </label>
-						<div class="flex gap-3">
-							<label class="flex items-center gap-2 cursor-pointer">
-								<input
-									type="radio"
-									name="invite_type"
-									value="beta"
-									bind:group={newInviteType}
-									class="w-4 h-4 text-info border-border focus:ring-info"
-								/>
-								<span class="text-sm text-foreground">Beta Tester</span>
-							</label>
-							<label class="flex items-center gap-2 cursor-pointer">
-								<input
-									type="radio"
-									name="invite_type"
-									value="comped"
-									bind:group={newInviteType}
-									class="w-4 h-4 text-accent border-border focus:ring-accent"
-								/>
-								<span class="text-sm text-foreground">Comped</span>
-							</label>
-						</div>
-						<p class="text-xs text-foreground-muted mt-1">
-							{#if newInviteType === "beta"}
-								Beta testers get free access now, should convert to paid later.
-							{:else}
-								Comped <GroveTerm term="wanderer" standard="Visitors">Wanderers</GroveTerm> are free forever
-								(special cases).
-							{/if}
-						</p>
-					</div>
-
 					<div>
 						<label for="tier" class="block text-sm font-medium text-foreground mb-1"> Tier </label>
 						<select
@@ -736,6 +528,10 @@
 							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
 						/>
 					</div>
+
+					<p class="text-xs text-foreground-muted">
+						Comped accounts are free forever — no billing, no expiry.
+					</p>
 
 					<button
 						type="submit"
@@ -819,10 +615,6 @@
 										>{tierLabels[newTier] || newTier}</strong
 									> plan, completely free.
 								</p>
-
-								{#if previewContent.feedback}
-									<p class="text-xs text-[#3d2914]/60 leading-relaxed">{previewContent.feedback}</p>
-								{/if}
 
 								<!-- CTA Button -->
 								<div class="text-center pt-2">

@@ -10,7 +10,9 @@ import { z } from "zod";
 export const VALID_TIERS = ["seedling", "sapling", "oak", "evergreen"] as const;
 export type CompedTier = (typeof VALID_TIERS)[number];
 
-// Valid invite types
+// Invite types that exist in the database. "beta" is legacy — it came from the
+// retired waitlist→beta-tester promotion flow. New invites are always "comped",
+// but the value is kept here so the admin list can filter/display old rows.
 export const VALID_INVITE_TYPES = ["comped", "beta"] as const;
 export type InviteType = (typeof VALID_INVITE_TYPES)[number];
 
@@ -22,7 +24,6 @@ export const CreateInviteSchema = z.object({
 	tier: z.enum(["seedling", "sapling", "oak", "evergreen"], {
 		error: "Please select a valid tier",
 	}),
-	invite_type: z.enum(["comped", "beta"]).optional().default("beta"),
 	custom_message: z.string().trim().optional().default(""),
 	notes: z.string().trim().optional().default(""),
 });
@@ -30,15 +31,4 @@ export const CreateInviteSchema = z.object({
 export const InviteIdSchema = z.object({
 	invite_id: z.string().min(1, "Invite ID is required"),
 	notes: z.string().trim().optional().default(""),
-});
-
-export const PromoteSchema = z.object({
-	email: z.string().toLowerCase().trim().min(1, "Invalid email address"),
-	tier: z.enum(["seedling", "sapling", "oak", "evergreen"]).optional().default("seedling"),
-	custom_message: z.string().trim().optional().default(""),
-});
-
-export const PromoteAllSchema = z.object({
-	tier: z.enum(["seedling", "sapling", "oak", "evergreen"]).optional().default("seedling"),
-	custom_message: z.string().trim().optional().default(""),
 });

@@ -10,22 +10,8 @@ import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import { parseFormData } from "@autumnsgrove/lattice/server";
 import { isWayfinder } from "@autumnsgrove/lattice/platform/config";
-import {
-	VALID_TIERS,
-	VALID_INVITE_TYPES,
-	CreateInviteSchema,
-	InviteIdSchema,
-	PromoteSchema,
-	PromoteAllSchema,
-} from "./schemas";
-import {
-	loadInviteData,
-	createInvite,
-	resendInvite,
-	revokeInvite,
-	promoteSubscriber,
-	bulkPromoteSubscribers,
-} from "./invite-service";
+import { VALID_TIERS, VALID_INVITE_TYPES, CreateInviteSchema, InviteIdSchema } from "./schemas";
+import { loadInviteData, createInvite, resendInvite, revokeInvite } from "./invite-service";
 
 export const load: PageServerLoad = async ({ parent, platform, url }) => {
 	const { isWayfinder, user } = await parent();
@@ -84,7 +70,6 @@ export const actions: Actions = {
 			{
 				email: result.data.email,
 				tier: result.data.tier,
-				inviteType: result.data.invite_type,
 				customMessage: result.data.custom_message || null,
 				notes: result.data.notes || null,
 				actorEmail: user.email,
@@ -160,83 +145,5 @@ export const actions: Actions = {
 		}
 
 		return { success: true, message: serviceResult.message };
-	},
-
-	promote: async ({ request, locals, platform }) => {
-		const user = locals.user;
-		if (!user) return fail(403, { error: "Not authenticated" });
-		if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
-		if (!platform?.env?.DB) return fail(500, { error: "Database not available" });
-
-		const formData = await request.formData();
-		const result = parseFormData(formData, PromoteSchema);
-		if (!result.success) {
-			const firstError = Object.values(result.errors).flat()[0];
-			return fail(400, { error: firstError || "Invalid form data" });
-		}
-
-		const serviceResult = await promoteSubscriber(
-			platform.env.DB,
-			{
-				email: result.data.email,
-				tier: result.data.tier,
-				customMessage: result.data.custom_message || null,
-				actorEmail: user.email,
-			},
-			{
-				ZEPHYR_API_KEY: platform.env.ZEPHYR_API_KEY,
-				RESEND_API_KEY: platform.env.RESEND_API_KEY,
-				ZEPHYR_URL: platform.env.ZEPHYR_URL,
-				ZEPHYR: platform.env.ZEPHYR,
-			},
-		);
-
-		if (!serviceResult.success) {
-			return fail(serviceResult.status || 400, { error: serviceResult.error });
-		}
-
-		return {
-			success: true,
-			emailStatus: serviceResult.emailStatus,
-			emailError: serviceResult.emailError,
-			message: serviceResult.message,
-		};
-	},
-
-	promote_all: async ({ request, locals, platform }) => {
-		const user = locals.user;
-		if (!user) return fail(403, { error: "Not authenticated" });
-		if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
-		if (!platform?.env?.DB) return fail(500, { error: "Database not available" });
-
-		const formData = await request.formData();
-		const result = parseFormData(formData, PromoteAllSchema);
-		if (!result.success) return fail(400, { error: "Please select a valid tier" });
-
-		const serviceResult = await bulkPromoteSubscribers(
-			platform.env.DB,
-			{
-				tier: result.data.tier,
-				customMessage: result.data.custom_message || null,
-				actorEmail: user.email,
-			},
-			{
-				ZEPHYR_API_KEY: platform.env.ZEPHYR_API_KEY,
-				RESEND_API_KEY: platform.env.RESEND_API_KEY,
-				ZEPHYR_URL: platform.env.ZEPHYR_URL,
-				ZEPHYR: platform.env.ZEPHYR,
-			},
-		);
-
-		if (!serviceResult.success) {
-			return fail(serviceResult.status || 500, { error: serviceResult.error });
-		}
-
-		return {
-			success: true,
-			emailStatus: serviceResult.emailStatus,
-			message: serviceResult.message,
-			promoteErrors: serviceResult.promoteErrors,
-		};
 	},
 };
