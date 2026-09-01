@@ -1,11 +1,41 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import { ArborSection } from "@autumnsgrove/lattice/ui/arbor";
 	import { metricIcons, featureIcons, phaseIcons } from "@autumnsgrove/prism/icons";
+	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
+	import { api } from "@autumnsgrove/lattice/utils";
 
 	let { data } = $props();
+
+	// Sparks (writing prompts) — beta-only, defaults to on, opt-out via settings
+	let sparksEnabled = $state(true);
+	let savingSparks = $state(false);
+
+	onMount(async () => {
+		try {
+			const settings = await api.get("/api/settings");
+			sparksEnabled = settings.sparks_enabled !== "false";
+		} catch (error) {
+			console.error("Failed to fetch settings:", error);
+		}
+	});
+
+	async function saveSparksSetting() {
+		savingSparks = true;
+		try {
+			await api.put("/api/admin/settings", {
+				setting_key: "sparks_enabled",
+				setting_value: sparksEnabled ? "true" : "false",
+			});
+			toast.success(sparksEnabled ? "Sparks enabled" : "Sparks turned off");
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : "Couldn't save Sparks setting");
+		}
+		savingSparks = false;
+	}
 </script>
 
 <ArborSection
@@ -84,6 +114,33 @@
 			</GlassCard>
 		</a>
 
+		<!-- Sparks (writing prompts) -->
+		<GlassCard variant="frosted" flush>
+			<div class="feature-body">
+				<div class="feature-icon">
+					<featureIcons.pencilSparkles class="icon" />
+				</div>
+				<div class="feature-content">
+					<div class="feature-title">Sparks</div>
+					<p class="feature-description">
+						Writing prompts that offer a starting point on a blank <GroveTerm
+							interactive
+							term="bloom">bloom</GroveTerm
+						>.
+					</p>
+					<label class="sparks-toggle">
+						<input
+							type="checkbox"
+							bind:checked={sparksEnabled}
+							onchange={saveSparksSetting}
+							disabled={savingSparks}
+						/>
+						<span>{sparksEnabled ? "Sparks are on" : "Sparks are off"}</span>
+					</label>
+				</div>
+			</div>
+		</GlassCard>
+
 	</div>
 </ArborSection>
 
@@ -143,6 +200,22 @@
 		font-size: 0.85rem;
 		color: var(--color-text-muted);
 		line-height: 1.4;
+	}
+
+	.sparks-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 0.625rem;
+		font-size: 0.85rem;
+		font-weight: 500;
+		color: var(--color-text);
+		cursor: pointer;
+		width: fit-content;
+	}
+
+	.sparks-toggle input[type="checkbox"] {
+		cursor: pointer;
 	}
 
 	.curio-count {

@@ -63,8 +63,12 @@
 	// The chooser card only makes sense before anything's been pinned —
 	// once pinned it collapses to the reference strip even if the draft is
 	// still blank, so pinning always reads as a completed decision.
+	// Global opt-out from Arbor > Settings > Features — defaults to on.
+	let sparksEnabled = $derived(data.siteSettings?.sparks_enabled !== "false");
 	let draftIsBlank = $derived(!title.trim() && !content.trim());
-	let showSparkChooser = $derived(!sparkMinimized && !pinnedPrompt && draftIsBlank);
+	let showSparkChooser = $derived(
+		sparksEnabled && !sparkMinimized && !pinnedPrompt && draftIsBlank,
+	);
 	let showSparkReference = $derived(!sparkMinimized && !showSparkChooser && !!activeSparkPrompt);
 	let showSparkPill = $derived(sparkMinimized && !!activeSparkPrompt);
 

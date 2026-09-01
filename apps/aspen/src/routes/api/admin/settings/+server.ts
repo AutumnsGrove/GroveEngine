@@ -63,6 +63,7 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 			"canopy_banner",
 			"canopy_categories",
 			"canopy_show_forests",
+			"sparks_enabled",
 		];
 		if (!allowedSettings.includes(setting_key)) {
 			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
@@ -70,6 +71,13 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 
 		// Validate show_grove_logo (boolean string)
 		if (setting_key === "show_grove_logo") {
+			if (setting_value !== "true" && setting_value !== "false") {
+				throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+			}
+		}
+
+		// Validate sparks_enabled (boolean string)
+		if (setting_key === "sparks_enabled") {
 			if (setting_value !== "true" && setting_value !== "false") {
 				throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 			}
