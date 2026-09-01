@@ -349,6 +349,18 @@ Flow is Grove's immersive Markdown editor—the space inside Arbor where you com
 
 _Where the current carries you._
 
+### Sparks
+
+**A Nudge to Start** · Inside Flow
+**Standard:** Writing Prompts
+**Waystone:** A curated bank of writing prompts that shows up when you start a blank post — use one, shuffle to another, or ignore it entirely.
+
+A spark doesn't make the fire. It just gives the tinder something to catch. Flint against steel, one small strike, and suddenly there's something to build on.
+
+Sparks is a bank of hand-picked writing prompts that appears the moment a new post is truly blank — no title, no words yet. Shuffle to another if the first doesn't land, pin one to keep it close while you write, or wave it off and start from nothing, same as always. It never writes the post for you. It just gives you somewhere to strike the match.
+
+_Somewhere to strike the match._
+
 ### Terrarium
 
 **Creative Canvas** · `grove.place/terrarium`

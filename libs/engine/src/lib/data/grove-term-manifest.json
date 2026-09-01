@@ -247,6 +247,17 @@
     ],
     "standardTerm": "Editor"
   },
+  "sparks": {
+    "slug": "sparks",
+    "term": "Sparks",
+    "category": "content",
+    "tagline": "A Nudge to Start",
+    "definition": "A curated bank of writing prompts that shows up when you start a blank post — use one, shuffle to another, or ignore it entirely.",
+    "seeAlso": [
+      "flow"
+    ],
+    "standardTerm": "Writing Prompts"
+  },
   "terrarium": {
     "slug": "terrarium",
     "term": "Terrarium",

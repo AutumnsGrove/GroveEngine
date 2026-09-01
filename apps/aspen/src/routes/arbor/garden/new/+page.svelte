@@ -343,7 +343,9 @@
 				<SparkIcon class="w-3.5 h-3.5 spark-reference-icon" />
 				<div class="spark-reference-body">
 					{#if pinnedPrompt}
-						<span class="spark-reference-label">Started with a spark</span>
+						<span class="spark-reference-label"
+							>Started with <GroveTerm term="sparks">a spark</GroveTerm></span
+						>
 					{/if}
 					<span class="spark-reference-text">"{activeSparkPrompt.text}"</span>
 				</div>

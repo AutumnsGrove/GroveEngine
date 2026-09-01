@@ -122,7 +122,7 @@
 				</div>
 				<div class="feature-content">
 					<div class="feature-title">
-						Sparks
+						<GroveTerm interactive term="sparks">Sparks</GroveTerm>
 						<Waystone slug="what-are-sparks" label="Learn about Sparks" />
 					</div>
 					<p class="feature-description">
