@@ -12,6 +12,7 @@ import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { TIERS, type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config/tiers";
+import { isBetaDeployment } from "$lib/server/beta";
 
 interface PostRecord {
 	id?: string;
@@ -150,7 +151,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
  * POST /api/posts - Create a new post in D1
  * Uses TenantDb for automatic tenant isolation
  */
-export const POST: RequestHandler = async ({ request, platform, locals }) => {
+export const POST: RequestHandler = async ({ request, platform, locals, url }) => {
 	// Auth check
 	if (!locals.user) {
 		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
@@ -363,20 +364,29 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			meadow_exclude: data.meadow_exclude ?? 0,
 			blaze: blazeSlug,
 			spark_prompt: data.spark_prompt || null,
+			is_beta: isBetaDeployment(locals, url) ? 1 : 0,
 			// Set published_at on direct publish (skipping draft stage) so RSS and
 			// meadow poller see the correct timestamp instead of NULL.
 			...(data.status === "published" ? { published_at: Math.floor(Date.now() / 1000) } : {}),
 		};
 
-		// Retry without blaze column if migration 088 hasn't been applied yet
+		// Retry without blaze/is_beta columns if their migrations haven't landed yet
 		try {
 			await tenantDb.insert("posts", insertData);
 		} catch (insertErr) {
 			const msg = insertErr instanceof Error ? insertErr.message : String(insertErr);
-			if ("blaze" in insertData && /no such column|has no column/i.test(msg)) {
-				console.warn("[Blooms] Retrying insert without blaze (migration 088 may be pending)");
-				delete insertData.blaze;
-				await tenantDb.insert("posts", insertData);
+			if (/no such column|has no column/i.test(msg)) {
+				if ("blaze" in insertData && msg.includes("blaze")) {
+					console.warn("[Blooms] Retrying insert without blaze (migration 088 may be pending)");
+					delete insertData.blaze;
+					await tenantDb.insert("posts", insertData);
+				} else if ("is_beta" in insertData && msg.includes("is_beta")) {
+					console.warn("[Blooms] Retrying insert without is_beta (migration 118 may be pending)");
+					delete insertData.is_beta;
+					await tenantDb.insert("posts", insertData);
+				} else {
+					throw insertErr;
+				}
 			} else {
 				throw insertErr;
 			}

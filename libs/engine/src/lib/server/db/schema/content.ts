@@ -45,6 +45,9 @@ export const posts = sqliteTable(
 		// Spark prompts (114) — the writing-prompt text (if any) a draft started from
 		sparkPrompt: text("spark_prompt"),
 
+		// Beta authorship tracking (118) — was this post created via the beta deployment?
+		isBeta: integer("is_beta").default(0),
+
 		// Timestamps
 		publishedAt: integer("published_at"),
 		createdAt: integer("created_at")
