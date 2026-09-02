@@ -9,23 +9,27 @@
 INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
 VALUES
   ('seed-comped-001', 'sage.wheeler@example.com', 'sapling', 'comped', 'Welcome to the grove, Sage!', 'autumn@grove.place', 'seed-token-comped-001', unixepoch() - 86400),
-  ('seed-comped-002', 'juniper.reyes@example.com', 'seedling', 'comped', NULL, 'autumn@grove.place', 'seed-token-comped-002', unixepoch() - 43200);
+  ('seed-comped-002', 'juniper.reyes@example.com', 'seedling', 'comped', NULL, 'autumn@grove.place', 'seed-token-comped-002', unixepoch() - 43200)
+ON CONFLICT(id) DO NOTHING;
 
 -- Used comped invite (already claimed by an existing seeded tenant)
 INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at, used_at, used_by_tenant_id, email_sent_at)
 VALUES
-  ('seed-comped-003', 'owner@driftwood-ink.grove.place', 'seedling', 'comped', 'Enjoy your free grove!', 'autumn@grove.place', 'seed-token-comped-003', unixepoch() - 604800, unixepoch() - 600000, 'example-tenant-002', unixepoch() - 604700);
+  ('seed-comped-003', 'owner@driftwood-ink.grove.place', 'seedling', 'comped', 'Enjoy your free grove!', 'autumn@grove.place', 'seed-token-comped-003', unixepoch() - 604800, unixepoch() - 600000, 'example-tenant-002', unixepoch() - 604700)
+ON CONFLICT(id) DO NOTHING;
 
 -- Legacy pending "beta" invites — retired type, still visible/filterable/resendable
 INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at, email_sent_at)
 VALUES
   ('seed-beta-001', 'wren.castillo@example.com', 'seedling', 'beta', NULL, 'autumn@grove.place', 'seed-token-beta-001', unixepoch() - 5184000, unixepoch() - 5183900),
-  ('seed-beta-002', 'ridley.moss@example.com', 'seedling', 'beta', 'Thanks for being an early tester', 'autumn@grove.place', 'seed-token-beta-002', unixepoch() - 5097600, NULL);
+  ('seed-beta-002', 'ridley.moss@example.com', 'seedling', 'beta', 'Thanks for being an early tester', 'autumn@grove.place', 'seed-token-beta-002', unixepoch() - 5097600, NULL)
+ON CONFLICT(id) DO NOTHING;
 
 -- Legacy used "beta" invite
 INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at, used_at, used_by_tenant_id, email_sent_at)
 VALUES
-  ('seed-beta-003', 'owner@quiet-orchard.grove.place', 'seedling', 'beta', NULL, 'autumn@grove.place', 'seed-token-beta-003', unixepoch() - 6912000, unixepoch() - 6900000, 'example-tenant-003', unixepoch() - 6911900);
+  ('seed-beta-003', 'owner@quiet-orchard.grove.place', 'seedling', 'beta', NULL, 'autumn@grove.place', 'seed-token-beta-003', unixepoch() - 6912000, unixepoch() - 6900000, 'example-tenant-003', unixepoch() - 6911900)
+ON CONFLICT(id) DO NOTHING;
 
 -- Audit log entries
 INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, actor_email, notes, created_at, invite_type)
@@ -41,4 +45,5 @@ VALUES
   ('seed-audit-009', 'use', 'seed-beta-003', 'owner@quiet-orchard.grove.place', 'seedling', 'owner@quiet-orchard.grove.place', NULL, unixepoch() - 6900000, 'beta'),
   -- A revoked invite that no longer has a live comped_invites row — shows the
   -- audit trail surviving past the invite's own deletion, same as production.
-  ('seed-audit-010', 'revoke', 'seed-revoked-001', 'stale.invite@example.com', 'seedling', 'autumn@grove.place', 'Requested by mistake', unixepoch() - 1728000, 'comped');
+  ('seed-audit-010', 'revoke', 'seed-revoked-001', 'stale.invite@example.com', 'seedling', 'autumn@grove.place', 'Requested by mistake', unixepoch() - 1728000, 'comped')
+ON CONFLICT(id) DO NOTHING;
