@@ -1,12 +1,13 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
-	import { navIcons, authIcons, featureIcons } from '@autumnsgrove/prism/icons';
+	import { navIcons, authIcons, featureIcons, phaseIcons } from '@autumnsgrove/prism/icons';
 	const Search = navIcons.search;
 	const Users = authIcons.users;
 	const HardDrive = featureIcons.hardDrive;
 	const FileText = featureIcons.fileText;
 	const ChevronRight = navIcons.chevronRight;
+	const FlaskConical = phaseIcons.flaskConical;
 
 	let { data }: { data: PageData } = $props();
 
@@ -89,7 +90,7 @@
 </div>
 
 <!-- Stats Cards -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
 	<GlassCard class="p-4 text-center">
 		<Users class="w-5 h-5 mx-auto mb-1 text-foreground-muted" />
 		<div class="text-2xl font-serif text-foreground">{data.stats.total}</div>
@@ -99,6 +100,11 @@
 		<FileText class="w-5 h-5 mx-auto mb-1 text-foreground-muted" />
 		<div class="text-2xl font-serif text-foreground">{data.stats.total_posts}</div>
 		<div class="text-sm text-foreground-muted font-sans">Posts</div>
+	</GlassCard>
+	<GlassCard class="p-4 text-center">
+		<FlaskConical class="w-5 h-5 mx-auto mb-1 text-foreground-muted" />
+		<div class="text-2xl font-serif text-foreground">{data.stats.total_beta_posts}</div>
+		<div class="text-sm text-foreground-muted font-sans">Beta Posts</div>
 	</GlassCard>
 	<GlassCard class="p-4 text-center">
 		<HardDrive class="w-5 h-5 mx-auto mb-1 text-foreground-muted" />
@@ -227,6 +233,13 @@
 							</td>
 							<td class="px-6 py-4">
 								<span class="text-sm font-sans text-foreground">{tenant.post_count}</span>
+								{#if tenant.beta_post_count > 0}
+									<span
+										class="ml-1 text-xs font-sans px-1.5 py-0.5 rounded bg-info-bg dark:bg-info-bg/30 text-info dark:text-info"
+									>
+										{tenant.beta_post_count} beta
+									</span>
+								{/if}
 							</td>
 							<td class="px-6 py-4">
 								<span class="text-sm font-sans text-foreground-muted">
