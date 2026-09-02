@@ -22,7 +22,7 @@ export const PROVIDERS: Record<LumenProviderName, LumenProviderConfig> = {
 		name: "OpenRouter",
 		baseUrl: "https://openrouter.ai/api/v1",
 		zdr: true, // OpenRouter partners have ZDR agreements
-		timeoutMs: 60000, // 60 seconds for long generations
+		timeoutMs: 120000, // 120 seconds for long generations
 	},
 	"cloudflare-ai": {
 		name: "Cloudflare Workers AI",
