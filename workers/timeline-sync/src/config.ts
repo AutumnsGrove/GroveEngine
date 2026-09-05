@@ -21,6 +21,8 @@ export interface Env {
 	LUMEN: { fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> };
 	/** API key for authenticating with the Lumen worker */
 	LUMEN_API_KEY: string;
+	/** Service binding to the Pulse observability collector worker */
+	PULSE: { fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> };
 	/** Optional fallback OpenRouter key if tenant key fails */
 	OPENROUTER_API_KEY?: string;
 	/** Bearer token gating the manual-trigger/debug HTTP routes (fetch handler) */
