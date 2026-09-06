@@ -57,6 +57,9 @@ function createMockEnv(overrides: Partial<Env> = {}): Env {
 		LUMEN: {
 			fetch: vi.fn().mockResolvedValue(new Response("ok")),
 		},
+		PULSE: {
+			fetch: vi.fn().mockResolvedValue(new Response("ok")),
+		},
 		TIMELINE_ADMIN_KEY: TEST_API_KEY,
 		...overrides,
 	};

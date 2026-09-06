@@ -43,6 +43,15 @@ const SQLITE_STALE_THRESHOLD_MS = 60 * 60 * 1000;
 /** Analytics flush alarm delay: 1 minute */
 const ANALYTICS_ALARM_MS = 60_000;
 
+/**
+ * Draft backup flush alarm delay: 5 minutes — matches the batching cadence
+ * documented in docs/patterns/loom-durable-objects-pattern.md. TenantDO's own
+ * SQLite `drafts` table is already durable and remains authoritative; this
+ * just mirrors it into D1 (`draft_backups`) so drafts survive a tenant's DO
+ * storage ever being wiped and are queryable with normal admin tooling.
+ */
+const DRAFTS_FLUSH_ALARM_MS = 5 * 60 * 1000;
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -478,7 +487,58 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 			draft.deviceId,
 		);
 
+		// Dedup no-ops if a flush is already pending — the next alarm fire will
+		// pick up this save along with anything else written before it lands.
+		await this.alarms.ensureScheduled(DRAFTS_FLUSH_ALARM_MS);
+
 		return Response.json({ success: true, lastSaved: now });
+	}
+
+	/**
+	 * Mirror all current drafts into D1's draft_backups table. Cheap to run
+	 * unconditionally — a tenant typically has a handful of in-progress drafts
+	 * at most, so there's no need to track per-slug dirty state.
+	 */
+	private async flushDraftsToD1(): Promise<void> {
+		const drafts = this.sql.queryAll<{
+			slug: string;
+			content: string;
+			metadata: string;
+			last_saved: number;
+			device_id: string;
+		}>("SELECT slug, content, metadata, last_saved, device_id FROM drafts");
+
+		if (drafts.length === 0) return;
+
+		if (!this.state_data) {
+			await this.locks.withLock("refresh", () => this.refreshConfig());
+		}
+		if (!this.state_data) {
+			this.log.warn("Skipping draft backup flush: tenant config unavailable");
+			return;
+		}
+
+		const tenantId = this.state_data.id;
+		const backedUpAt = Date.now();
+
+		const statements = drafts.map((d) =>
+			this.env.DB.prepare(
+				`INSERT INTO draft_backups (tenant_id, slug, content, metadata, last_saved, device_id, backed_up_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(tenant_id, slug) DO UPDATE SET
+           content = excluded.content,
+           metadata = excluded.metadata,
+           last_saved = excluded.last_saved,
+           device_id = excluded.device_id,
+           backed_up_at = excluded.backed_up_at`,
+			).bind(tenantId, d.slug, d.content, d.metadata, d.last_saved, d.device_id, backedUpAt),
+		);
+
+		try {
+			await this.env.DB.batch(statements);
+		} catch (error) {
+			this.log.error("Failed to flush draft backups to D1", { error: String(error) });
+		}
 	}
 
 	private async handleDeleteDraft(ctx: LoomRequestContext): Promise<Response> {
@@ -608,7 +668,10 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 	// ============================================================================
 
 	protected async onAlarm(): Promise<void> {
+		// TenantDO has a single alarm slot shared across concerns (Loom's
+		// dedup-on-schedule pattern) — whichever fires runs everything pending.
 		await this.flushAnalytics();
+		await this.flushDraftsToD1();
 	}
 
 	private async flushAnalytics(): Promise<void> {

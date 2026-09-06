@@ -29,6 +29,7 @@ import {
 	buildSummaryContextData,
 } from "./context";
 import { RemoteLumenClient } from "@autumnsgrove/lattice/ai/lumen";
+import { initPulse, emitPulseEvent, flushPulse } from "@autumnsgrove/lattice/pulse";
 
 // =============================================================================
 // Public API
@@ -211,26 +212,33 @@ export async function processTenantTimeline(
 			fetcher: env.LUMEN,
 		});
 
-		const aiResult = await lumen.run({
-			task: "summary",
-			input: [
-				{ role: "system", content: systemPrompt },
-				{ role: "user", content: userPrompt },
-			],
-			tenant: config.tenantId,
-			options: {
-				model: config.openrouterModel || DEFAULT_OPENROUTER_MODEL,
-				tenantApiKey: openrouterKey,
-				// 2048 was too tight for the full brief+detailed+gutter JSON envelope
-				// on busier days — the model gets cut off mid-object, JSON.parse()
-				// throws, and parseAIResponse() silently swaps in the generic
-				// "got a bit tangled" fallback text instead of surfacing an error.
-				// Doubled again to 8192 as headroom for tenants with heavier days
-				// than we've tested against.
-				maxTokens: 8192,
-				temperature: 0.7,
-			},
-		});
+		// A cron run only gets one shot — there's no user sitting there to hit
+		// "retry" if Lumen's whole fallback chain trips on a transient network
+		// blip. Retrying the entire chain (not just one model) absorbs that.
+		const aiResult = await withRetry(
+			() =>
+				lumen.run({
+					task: "summary",
+					input: [
+						{ role: "system", content: systemPrompt },
+						{ role: "user", content: userPrompt },
+					],
+					tenant: config.tenantId,
+					options: {
+						model: config.openrouterModel || DEFAULT_OPENROUTER_MODEL,
+						tenantApiKey: openrouterKey,
+						// 2048 was too tight for the full brief+detailed+gutter JSON envelope
+						// on busier days — the model gets cut off mid-object, JSON.parse()
+						// throws, and parseAIResponse() silently swaps in the generic
+						// "got a bit tangled" fallback text instead of surfacing an error.
+						// Doubled again to 8192 as headroom for tenants with heavier days
+						// than we've tested against.
+						maxTokens: 8192,
+						temperature: 0.7,
+					},
+				}),
+			{ attempts: 3, delayMs: 3000, logPrefix },
+		);
 
 		// 7. Parse AI response
 		const parsed = parseAIResponse(aiResult.content);
@@ -373,6 +381,21 @@ export async function processTenantTimeline(
 		const errorMessage = err instanceof Error ? err.message : String(err);
 		console.error(`${logPrefix} Failed:`, errorMessage);
 
+		// console.error alone is invisible after the fact — this worker has no
+		// tail/Logpush wired up, so a bad cron night was previously undiscoverable
+		// except by noticing a missing day days later. Pulse gives it a durable trail.
+		try {
+			initPulse(env.PULSE);
+			emitPulseEvent("error.server", {
+				app: "timeline-sync",
+				tenant_id: config.tenantId,
+				metadata: { message: errorMessage, date: targetDate },
+			});
+			await flushPulse();
+		} catch {
+			// Observability must never break the product it's observing.
+		}
+
 		return {
 			success: false,
 			tenantId: config.tenantId,
@@ -380,6 +403,34 @@ export async function processTenantTimeline(
 			error: errorMessage,
 		};
 	}
+}
+
+/**
+ * Retry a fallible async operation with a fixed delay between attempts.
+ * Used for the Lumen call, whose own internal fallback chain can still trip
+ * entirely on a transient network blip — a cron run gets one shot, with no
+ * user around to manually retry.
+ */
+async function withRetry<T>(
+	fn: () => Promise<T>,
+	options: { attempts: number; delayMs: number; logPrefix: string },
+): Promise<T> {
+	let lastError: unknown;
+	for (let attempt = 1; attempt <= options.attempts; attempt++) {
+		try {
+			return await fn();
+		} catch (err) {
+			lastError = err;
+			if (attempt < options.attempts) {
+				console.warn(
+					`${options.logPrefix} Attempt ${attempt}/${options.attempts} failed, retrying in ${options.delayMs}ms:`,
+					err instanceof Error ? err.message : String(err),
+				);
+				await new Promise((resolve) => setTimeout(resolve, options.delayMs));
+			}
+		}
+	}
+	throw lastError;
 }
 
 // =============================================================================

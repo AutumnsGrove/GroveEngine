@@ -37,6 +37,16 @@ binding = "LUMEN"
 service = "grove-lumen"
 
 # =============================================================================
+# Service Bindings — Pulse Observability
+# =============================================================================
+# Ships tenant-generation failures to pulse_events (grove-obs-db) so a bad
+# cron night is visible in Arbor's /arbor/pulse/errors instead of only ever
+# existing in ephemeral console.log output.
+[[services]]
+binding = "PULSE"
+service = "grove-pulse-collector"
+
+# =============================================================================
 # Envelope Encryption - Key Encryption Key (KEK)
 # =============================================================================
 # The KEK decrypts per-tenant DEKs which decrypt the actual API tokens.

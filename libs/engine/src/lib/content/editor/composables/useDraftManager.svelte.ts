@@ -7,6 +7,15 @@ import { apiRequest } from "$lib/utils/api";
 
 const AUTO_SAVE_DELAY = 5000; // 5 seconds
 
+/**
+ * Force-save heartbeat: flushes unsaved content on a fixed interval,
+ * independent of the debounce above. The debounce only fires after a pause
+ * in typing — a long, uninterrupted burst of typing that gets cut off
+ * (tab killed, browser crash) never triggers it and can lose everything
+ * written since the last pause. This is the backstop for that case.
+ */
+const FORCE_SAVE_INTERVAL_MS = 15_000; // 15 seconds
+
 export interface DraftMetadata {
 	title?: string;
 	description?: string;
@@ -93,6 +102,8 @@ export function useDraftManager(options: DraftManagerOptions = {}): DraftManager
 	let serverSyncStatus = $state<ServerSyncStatus>("idle");
 	// NOT $state — same reason as draftSaveTimer above
 	let savedConfirmTimer: ReturnType<typeof setTimeout> | null = null;
+	// NOT $state — same reason as draftSaveTimer above
+	let forceSaveInterval: ReturnType<typeof setInterval> | null = null;
 
 	function saveDraft(): void {
 		if (!draftKey || readonly || !getContent) return;
@@ -189,6 +200,30 @@ export function useDraftManager(options: DraftManagerOptions = {}): DraftManager
 		}
 	}
 
+	/**
+	 * Fetch the server-side draft (TenantDO) for cross-device/durable recovery.
+	 * Returns null if there's no serverSlug, no draft exists yet (404), or the
+	 * request fails — in all cases the local draft remains the fallback.
+	 */
+	async function fetchServerDraft(): Promise<StoredDraft | null> {
+		if (!serverSlug) return null;
+		try {
+			const result = await apiRequest<{
+				content: string;
+				metadata?: DraftMetadata;
+				lastSaved: number;
+			}>(`/api/drafts/${encodeURIComponent(serverSlug)}`);
+			if (!result) return null;
+			return {
+				content: result.content,
+				savedAt: new Date(result.lastSaved).toISOString(),
+				metadata: result.metadata,
+			};
+		} catch {
+			return null;
+		}
+	}
+
 	function loadDraft(): StoredDraft | null {
 		if (!draftKey) return null;
 
@@ -265,13 +300,42 @@ export function useDraftManager(options: DraftManagerOptions = {}): DraftManager
 		// causing the auto-save to think content has changed immediately.
 		lastSavedContent = initialContent;
 
-		// Check for existing draft on mount
-		if (draftKey) {
-			const draft = loadDraft();
-			if (draft && draft.content !== initialContent) {
-				storedDraft = draft;
-				draftRestorePrompt = true;
-			}
+		// Check for existing local draft on mount
+		const local = draftKey ? loadDraft() : null;
+		if (local && local.content !== initialContent) {
+			storedDraft = local;
+			draftRestorePrompt = true;
+		}
+
+		// Reconcile against the server copy once it arrives. This is the fix for
+		// the case that actually causes data loss: localStorage can be wiped,
+		// scoped to a private browsing partition, or just never written (e.g. a
+		// tab discard skips beforeunload entirely) while the server copy — synced
+		// on every successful autosave — survives. Newest timestamp wins.
+		if (serverSlug) {
+			fetchServerDraft().then((server) => {
+				if (!server) return;
+				const localTime = local ? new Date(local.savedAt).getTime() : -Infinity;
+				const serverTime = new Date(server.savedAt).getTime();
+				if (serverTime > localTime && server.content !== initialContent) {
+					storedDraft = server;
+					draftRestorePrompt = true;
+				}
+			});
+		}
+
+		// Force-save heartbeat: catches long, uninterrupted typing bursts that
+		// never trigger the pause-based debounce above. Re-checks
+		// draftRestorePrompt on every tick (not just at setup) since the async
+		// server-reconcile above can flip it true after this interval starts.
+		if (draftKey && !readonly) {
+			forceSaveInterval = setInterval(() => {
+				if (draftRestorePrompt || !getContent) return;
+				const current = getContent();
+				if (current !== lastSavedContent) {
+					saveDraft();
+				}
+			}, FORCE_SAVE_INTERVAL_MS);
 		}
 	}
 
@@ -305,6 +369,11 @@ export function useDraftManager(options: DraftManagerOptions = {}): DraftManager
 
 		if (savedConfirmTimer) {
 			clearTimeout(savedConfirmTimer);
+		}
+
+		if (forceSaveInterval) {
+			clearInterval(forceSaveInterval);
+			forceSaveInterval = null;
 		}
 	}
 

@@ -536,8 +536,11 @@
 	});
 
 	// Auto-save draft effect
+	// Skipped while an unresolved restore prompt is showing — otherwise typing
+	// before clicking [restore]/[discard] silently overwrites the one
+	// recoverable copy with in-progress content nobody's confirmed yet.
 	$effect(() => {
-		if (draftKey && !readonly) {
+		if (draftKey && !readonly && !draftManager.draftRestorePrompt) {
 			draftManager.scheduleSave(content);
 		}
 	});
@@ -642,7 +645,7 @@
 	<!-- Formatting Toolbar + Status Bar -->
 	<FormattingToolbar
 		{editorMode}
-		{readonly}
+		readonly={readonly || draftManager.draftRestorePrompt}
 		{isZenMode}
 		{saving}
 		{draftKey}
@@ -669,7 +672,7 @@
 	<EditorCore
 		bind:content
 		{editorMode}
-		{readonly}
+		readonly={readonly || draftManager.draftRestorePrompt}
 		{previewHtml}
 		{lineNumbers}
 		{cursorLine}

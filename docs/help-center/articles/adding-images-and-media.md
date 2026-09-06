@@ -3,7 +3,7 @@ title: Adding Images and Media
 description: How to upload and use images in your posts
 category: help
 section: customization
-lastUpdated: '2025-12-24'
+lastUpdated: '2026-09-06'
 keywords:
   - images
   - photos
@@ -43,11 +43,17 @@ Grove handles the technical details—your image is stored securely and served f
 
 **Size limit:** 10MB per image. That's plenty for most photos. If your image is larger, you'll need to resize it before uploading.
 
-## Cover images (coming soon)
+## Cover images
 
-Grove is working on a cover image feature that will let you set a main visual for each post—appearing at the top of your post and in social media previews when you share links.
+Every post has a **Cover Image** field in the editor sidebar, right below the description. It appears at the top of your published post, above the title.
 
-For now, you can add images directly in your post content. The first image in your post often serves a similar purpose.
+To set one:
+
+1. Upload your image first (drag it into the editor, or use the [image uploader](/arbor/images))
+2. Copy the image URL
+3. Paste it into the **Cover Image** field
+
+There's no built-in cropper, so pick an image that reads well wide—it displays full-width and gets cropped to fit, so a landscape-oriented photo works better than a tall one.
 
 ## Adding alt text
 
