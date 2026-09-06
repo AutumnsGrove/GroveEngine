@@ -15,6 +15,10 @@ main = ".svelte-kit/cloudflare/_worker.js"
 [assets]
 directory = ".svelte-kit/cloudflare"
 binding = "ASSETS"
+# API routes must always hit the Worker, never get resolved by the asset
+# layer — the status page's health-check monitor was intermittently seeing
+# 404s on /api/health that never reached SvelteKit's own request handling.
+run_worker_first = ["/api/*"]
 
 # Smart Placement — run closer to back-end services (billing-api) for lower latency
 [placement]

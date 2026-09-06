@@ -8,7 +8,7 @@
 import type { HealthCheckResult } from "./health-checks";
 import { INCIDENT_THRESHOLDS, EMAIL_FROM_ADDRESS, EMAIL_FROM_NAME } from "./config";
 import { generateUUID } from "./utils";
-import { updateTodayWorstStatus } from "./daily-history";
+import { recordCheckResult } from "./daily-history";
 import { createZephyrClient } from "@autumnsgrove/lattice/zephyr";
 
 /**
@@ -249,6 +249,11 @@ export async function processHealthCheckResult(
 	env: IncidentEnv,
 	result: HealthCheckResult,
 ): Promise<void> {
+	// Record this check's raw outcome toward today's average, independent of
+	// the debounced incident/current-status logic below — a single blip should
+	// barely move the day's status, not freeze it at "worst status seen".
+	await recordCheckResult(env, result.componentId, result.status);
+
 	const state = await getComponentState(env.MONITOR_KV, result.componentId);
 	const isHealthy = result.status === "operational";
 	const isMaintenance = result.status === "maintenance";
@@ -256,7 +261,6 @@ export async function processHealthCheckResult(
 	// Maintenance is intentional — just update status, no incidents
 	if (isMaintenance) {
 		await updateComponentStatus(env.DB, result.componentId, "maintenance");
-		await updateTodayWorstStatus(env, result.componentId, "maintenance");
 		state.lastStatus = result.status;
 		state.lastCheckAt = result.timestamp;
 		await saveComponentState(env.MONITOR_KV, result.componentId, state);
@@ -311,7 +315,6 @@ export async function processHealthCheckResult(
 		// (prevents flapping from a single slow check due to CF-to-CF latency)
 		if (state.consecutiveFailures >= INCIDENT_THRESHOLDS.CHECKS_TO_DEGRADE) {
 			await updateComponentStatus(env.DB, result.componentId, result.status);
-			await updateTodayWorstStatus(env, result.componentId, result.status);
 		}
 
 		// Check if we should create a new incident

@@ -38,6 +38,45 @@ function getWorstStatus(statuses: string[]): string {
 }
 
 /**
+ * Maps a health check status to its counter column in status_daily_history.
+ * Restricted to these five known columns — never built from external input.
+ */
+const STATUS_CHECK_COLUMN: Record<string, string> = {
+	operational: "operational_checks",
+	degraded: "degraded_checks",
+	partial_outage: "partial_outage_checks",
+	major_outage: "major_outage_checks",
+	maintenance: "maintenance_checks",
+};
+
+const PRIORITY_TO_STATUS = [
+	"operational",
+	"maintenance",
+	"degraded",
+	"partial_outage",
+	"major_outage",
+];
+
+/**
+ * Derive a single representative status for the day from the count of
+ * every individual check outcome, weighted by severity. A handful of
+ * blips among hundreds of healthy checks barely moves this average —
+ * unlike the old "worst status seen" approach, which locked in red for
+ * the rest of the day after a single failure.
+ */
+function averageStatusFromCounts(counts: Record<string, number>): string {
+	const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
+	if (total === 0) return "operational";
+
+	const weightedSum = Object.entries(counts).reduce(
+		(sum, [status, count]) => sum + (STATUS_PRIORITY[status] ?? 0) * count,
+		0,
+	);
+	const bucket = Math.min(4, Math.max(0, Math.round(weightedSum / total)));
+	return PRIORITY_TO_STATUS[bucket];
+}
+
+/**
  * Count incidents for a component on a given date
  */
 async function countIncidentsForDate(
@@ -96,51 +135,66 @@ async function countIncidentsForDate(
 }
 
 /**
- * Update today's worst status for a component.
- * Called after each health check to capture status changes in real-time.
- * Only updates if the new status is worse than what's already recorded.
+ * Record a single health check's outcome toward today's running average.
+ * Called after every health check, regardless of pass/fail — the day's
+ * displayed status is recomputed from the full distribution of outcomes
+ * so far, not just the worst one seen.
  */
-export async function updateTodayWorstStatus(
+export async function recordCheckResult(
 	env: DailyHistoryEnv,
 	componentId: string,
-	currentStatus: string,
+	status: string,
 ): Promise<void> {
 	const today = new Date().toISOString().split("T")[0];
-	const currentPriority = STATUS_PRIORITY[currentStatus] ?? 0;
+	const column = STATUS_CHECK_COLUMN[status] ?? STATUS_CHECK_COLUMN.operational;
+	const id = generateUUID();
+	const now = new Date().toISOString();
 
-	// Skip if operational — no need to write "everything is fine" every 5 min
-	if (currentPriority === 0) return;
+	await env.DB.prepare(
+		`INSERT INTO status_daily_history (id, component_id, date, status, incident_count, ${column}, created_at)
+         VALUES (?, ?, ?, 'operational', 0, 1, ?)
+         ON CONFLICT(component_id, date)
+         DO UPDATE SET ${column} = ${column} + 1`,
+	)
+		.bind(id, componentId, today, now)
+		.run();
 
-	// Check existing record for today
-	const existing = await env.DB.prepare(
-		`SELECT status FROM status_daily_history WHERE component_id = ? AND date = ?`,
+	const counts = await env.DB.prepare(
+		`SELECT operational_checks, degraded_checks, partial_outage_checks, major_outage_checks, maintenance_checks
+         FROM status_daily_history WHERE component_id = ? AND date = ?`,
 	)
 		.bind(componentId, today)
-		.first<{ status: string }>();
+		.first<{
+			operational_checks: number;
+			degraded_checks: number;
+			partial_outage_checks: number;
+			major_outage_checks: number;
+			maintenance_checks: number;
+		}>();
 
-	const existingPriority = STATUS_PRIORITY[existing?.status ?? "operational"] ?? 0;
+	if (!counts) return;
 
-	// Only write if current status is worse than what we've already recorded
-	if (currentPriority > existingPriority) {
-		const id = generateUUID();
-		const now = new Date().toISOString();
+	const avgStatus = averageStatusFromCounts({
+		operational: counts.operational_checks,
+		degraded: counts.degraded_checks,
+		partial_outage: counts.partial_outage_checks,
+		major_outage: counts.major_outage_checks,
+		maintenance: counts.maintenance_checks,
+	});
 
-		await env.DB.prepare(
-			`INSERT INTO status_daily_history (id, component_id, date, status, incident_count, created_at)
-         VALUES (?, ?, ?, ?, 0, ?)
-         ON CONFLICT(component_id, date)
-         DO UPDATE SET status = excluded.status`,
-		)
-			.bind(id, componentId, today, currentStatus, now)
-			.run();
-	}
+	await env.DB.prepare(
+		`UPDATE status_daily_history SET status = ? WHERE component_id = ? AND date = ?`,
+	)
+		.bind(avgStatus, componentId, today)
+		.run();
 }
 
 /**
  * Record daily status for a single component.
- * Health checks already capture worst status in real-time via updateTodayWorstStatus().
- * This midnight job enriches the record with incident counts, and provides a
- * fallback status for days where no health check captured a non-operational state.
+ * Health checks already maintain an averaged status in real-time via
+ * recordCheckResult(). This midnight job enriches the record with incident
+ * counts, and provides an incident-derived fallback status for days where
+ * the monitor cron didn't run at all (no check rows exist yet).
  */
 async function recordDailyStatusForComponent(
 	db: D1Database,

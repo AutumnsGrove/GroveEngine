@@ -164,8 +164,11 @@ describe("processHealthCheckResult - State Machine", () => {
 			lastCheckAt: "2025-01-01T00:00:00.000Z",
 		});
 
-		// Mock the incident existence check (resolveIncident does a SELECT first)
+		// Mock the incident existence check (resolveIncident does a SELECT first).
+		// The first .first() call now belongs to recordCheckResult's daily-average
+		// lookup (defaults to null via the shared mock), so this is the second.
 		const mockStmt = (env.DB.prepare as Mock)();
+		mockStmt.first.mockResolvedValueOnce(null);
 		mockStmt.first.mockResolvedValueOnce({ id: "incident-123" });
 
 		await processHealthCheckResult(env, createHealthyResult());
