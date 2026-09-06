@@ -7,6 +7,15 @@ import { apiRequest } from "$lib/utils/api";
 
 const AUTO_SAVE_DELAY = 5000; // 5 seconds
 
+/**
+ * Force-save heartbeat: flushes unsaved content on a fixed interval,
+ * independent of the debounce above. The debounce only fires after a pause
+ * in typing — a long, uninterrupted burst of typing that gets cut off
+ * (tab killed, browser crash) never triggers it and can lose everything
+ * written since the last pause. This is the backstop for that case.
+ */
+const FORCE_SAVE_INTERVAL_MS = 15_000; // 15 seconds
+
 export interface DraftMetadata {
 	title?: string;
 	description?: string;
@@ -93,6 +102,8 @@ export function useDraftManager(options: DraftManagerOptions = {}): DraftManager
 	let serverSyncStatus = $state<ServerSyncStatus>("idle");
 	// NOT $state — same reason as draftSaveTimer above
 	let savedConfirmTimer: ReturnType<typeof setTimeout> | null = null;
+	// NOT $state — same reason as draftSaveTimer above
+	let forceSaveInterval: ReturnType<typeof setInterval> | null = null;
 
 	function saveDraft(): void {
 		if (!draftKey || readonly || !getContent) return;
@@ -312,6 +323,20 @@ export function useDraftManager(options: DraftManagerOptions = {}): DraftManager
 				}
 			});
 		}
+
+		// Force-save heartbeat: catches long, uninterrupted typing bursts that
+		// never trigger the pause-based debounce above. Re-checks
+		// draftRestorePrompt on every tick (not just at setup) since the async
+		// server-reconcile above can flip it true after this interval starts.
+		if (draftKey && !readonly) {
+			forceSaveInterval = setInterval(() => {
+				if (draftRestorePrompt || !getContent) return;
+				const current = getContent();
+				if (current !== lastSavedContent) {
+					saveDraft();
+				}
+			}, FORCE_SAVE_INTERVAL_MS);
+		}
 	}
 
 	/**
@@ -344,6 +369,11 @@ export function useDraftManager(options: DraftManagerOptions = {}): DraftManager
 
 		if (savedConfirmTimer) {
 			clearTimeout(savedConfirmTimer);
+		}
+
+		if (forceSaveInterval) {
+			clearInterval(forceSaveInterval);
+			forceSaveInterval = null;
 		}
 	}
 
