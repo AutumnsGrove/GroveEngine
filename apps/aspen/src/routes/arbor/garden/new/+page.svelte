@@ -43,6 +43,26 @@
 		[...GLOBAL_BLAZE_DEFAULTS],
 	);
 
+	/**
+	 * Unique draft key for this "new bloom" session — sessionStorage-scoped so a
+	 * tab discard/reload resumes the same draft, but a genuinely new tab or a
+	 * fresh visit after saving gets a new id. Previously this was the static
+	 * literal "new-bloom", which meant every unsaved new post on this browser
+	 * shared one localStorage/TenantDO slot and could silently overwrite
+	 * another in-progress draft (issue #1586).
+	 */
+	function getOrCreateDraftId(): string {
+		if (!browser) return "unsaved";
+		const key = "grove-new-post-draft-id";
+		let id = sessionStorage.getItem(key);
+		if (!id) {
+			id = crypto.randomUUID();
+			sessionStorage.setItem(key, id);
+		}
+		return id;
+	}
+	const draftSlug = `new-${getOrCreateDraftId()}`;
+
 	onMount(async () => {
 		try {
 			const res = await fetch("/api/blazes"); // csrf-ok — GET-only read
@@ -153,6 +173,7 @@
 			});
 
 			editorRef?.clearDraft();
+			if (browser) sessionStorage.removeItem("grove-new-post-draft-id");
 			navigatingAfterSave = true;
 
 			toast.success(`Draft saved!`, {
@@ -230,6 +251,7 @@
 			});
 
 			editorRef?.clearDraft();
+			if (browser) sessionStorage.removeItem("grove-new-post-draft-id");
 			navigatingAfterSave = true;
 
 			toast.success(`${resolveTermString("Bloom", "Post")} published!`, {
@@ -455,8 +477,8 @@
 						bind:content
 						{saving}
 						onSave={handleSave}
-						draftKey="new-bloom"
-						serverDraftSlug="new-bloom"
+						draftKey={draftSlug}
+						serverDraftSlug={draftSlug}
 						bind:previewTitle={title}
 						previewDate={date}
 						previewTags={parseTags(tagsInput)}

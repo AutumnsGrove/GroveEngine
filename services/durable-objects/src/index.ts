@@ -41,8 +41,25 @@ export class FeedDO {
 
 interface Env {
 	THRESHOLD: DurableObjectNamespace;
+	TENANTS: DurableObjectNamespace;
 	/** Shared secret for operator-only endpoints (e.g. rate limit reset). Not exposed to any tenant-facing app. */
 	OPS_ADMIN_KEY?: string;
+}
+
+/**
+ * Shared bearer-token check for operator-only endpoints.
+ * Returns null if authorized, or an error Response to short-circuit the request.
+ */
+async function checkOpsAuth(request: Request, env: Env): Promise<Response | null> {
+	if (!env.OPS_ADMIN_KEY) {
+		return Response.json({ error: "not_configured" }, { status: 503 });
+	}
+	const auth = request.headers.get("Authorization") ?? "";
+	const provided = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+	if (!provided || !(await timingSafeEqual(provided, env.OPS_ADMIN_KEY))) {
+		return Response.json({ error: "unauthorized" }, { status: 401 });
+	}
+	return null;
 }
 
 /**
@@ -75,15 +92,8 @@ async function timingSafeEqual(a: string, b: string): Promise<boolean> {
  *   key        — the exact rate-limit key checked (e.g. "ai/timeline-generate:<userId>").
  */
 async function handleThresholdReset(request: Request, env: Env): Promise<Response> {
-	if (!env.OPS_ADMIN_KEY) {
-		return Response.json({ error: "not_configured" }, { status: 503 });
-	}
-
-	const auth = request.headers.get("Authorization") ?? "";
-	const provided = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-	if (!provided || !(await timingSafeEqual(provided, env.OPS_ADMIN_KEY))) {
-		return Response.json({ error: "unauthorized" }, { status: 401 });
-	}
+	const authError = await checkOpsAuth(request, env);
+	if (authError) return authError;
 
 	const body = (await request.json().catch(() => null)) as {
 		identifier?: string;
@@ -104,6 +114,37 @@ async function handleThresholdReset(request: Request, env: Env): Promise<Respons
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ key: body.key }),
 	});
+
+	return new Response(await res.text(), {
+		status: res.status,
+		headers: { "Content-Type": "application/json" },
+	});
+}
+
+/**
+ * GET /tenant-drafts/:subdomain — operator-only draft recovery/inspection.
+ * Lists every in-progress draft TenantDO is holding for a tenant, bypassing
+ * per-user session ownership checks entirely (this is the escape hatch for
+ * when a user lost local state and support needs to look at what the server
+ * still has). Never wired into any tenant-facing app.
+ *
+ * GET /tenant-drafts/:subdomain/:slug — full content of one draft.
+ */
+async function handleGetTenantDrafts(
+	request: Request,
+	env: Env,
+	subdomain: string,
+	slug: string | undefined,
+): Promise<Response> {
+	const authError = await checkOpsAuth(request, env);
+	if (authError) return authError;
+
+	const id = env.TENANTS.idFromName(`tenant:${subdomain}`);
+	const stub = env.TENANTS.get(id);
+	const path = slug
+		? `https://tenant.internal/drafts/${encodeURIComponent(slug)}`
+		: "https://tenant.internal/drafts";
+	const res = await stub.fetch(path);
 
 	return new Response(await res.text(), {
 		status: res.status,
@@ -135,6 +176,12 @@ export default {
 
 		if (url.pathname === "/threshold/reset" && request.method === "POST") {
 			return handleThresholdReset(request, env);
+		}
+
+		const draftsMatch = url.pathname.match(/^\/tenant-drafts\/([^/]+)(?:\/([^/]+))?$/);
+		if (draftsMatch && request.method === "GET") {
+			const [, subdomain, slug] = draftsMatch;
+			return handleGetTenantDrafts(request, env, decodeURIComponent(subdomain), slug);
 		}
 
 		return new Response("Grove Durable Objects Worker", {

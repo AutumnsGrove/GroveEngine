@@ -189,6 +189,30 @@ export function useDraftManager(options: DraftManagerOptions = {}): DraftManager
 		}
 	}
 
+	/**
+	 * Fetch the server-side draft (TenantDO) for cross-device/durable recovery.
+	 * Returns null if there's no serverSlug, no draft exists yet (404), or the
+	 * request fails — in all cases the local draft remains the fallback.
+	 */
+	async function fetchServerDraft(): Promise<StoredDraft | null> {
+		if (!serverSlug) return null;
+		try {
+			const result = await apiRequest<{
+				content: string;
+				metadata?: DraftMetadata;
+				lastSaved: number;
+			}>(`/api/drafts/${encodeURIComponent(serverSlug)}`);
+			if (!result) return null;
+			return {
+				content: result.content,
+				savedAt: new Date(result.lastSaved).toISOString(),
+				metadata: result.metadata,
+			};
+		} catch {
+			return null;
+		}
+	}
+
 	function loadDraft(): StoredDraft | null {
 		if (!draftKey) return null;
 
@@ -265,13 +289,28 @@ export function useDraftManager(options: DraftManagerOptions = {}): DraftManager
 		// causing the auto-save to think content has changed immediately.
 		lastSavedContent = initialContent;
 
-		// Check for existing draft on mount
-		if (draftKey) {
-			const draft = loadDraft();
-			if (draft && draft.content !== initialContent) {
-				storedDraft = draft;
-				draftRestorePrompt = true;
-			}
+		// Check for existing local draft on mount
+		const local = draftKey ? loadDraft() : null;
+		if (local && local.content !== initialContent) {
+			storedDraft = local;
+			draftRestorePrompt = true;
+		}
+
+		// Reconcile against the server copy once it arrives. This is the fix for
+		// the case that actually causes data loss: localStorage can be wiped,
+		// scoped to a private browsing partition, or just never written (e.g. a
+		// tab discard skips beforeunload entirely) while the server copy — synced
+		// on every successful autosave — survives. Newest timestamp wins.
+		if (serverSlug) {
+			fetchServerDraft().then((server) => {
+				if (!server) return;
+				const localTime = local ? new Date(local.savedAt).getTime() : -Infinity;
+				const serverTime = new Date(server.savedAt).getTime();
+				if (serverTime > localTime && server.content !== initialContent) {
+					storedDraft = server;
+					draftRestorePrompt = true;
+				}
+			});
 		}
 	}
 
